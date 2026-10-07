@@ -314,7 +314,7 @@ function Footer() {
             </div>
           </div>
           <dl className="mt-5 space-y-1.5 text-sm">
-            <div><dt className="inline text-white/55">{t('Cơ quan chủ quản', 'Governing body')}: </dt><dd className="inline">{s && <a href={s.parentPortalUrl} target="_blank" rel="noopener noreferrer" className="text-white underline-offset-2 hover:underline">{lang === 'en'' ? s.parentOrgEn : s.parentOrg}</a>}</dd></div>
+            <div><dt className="inline text-white/55">{t('Cơ quan chủ quản', 'Governing body')}: </dt><dd className="inline">{s && <a href={s.parentPortalUrl} target="_blank" rel="noopener noreferrer" className="text-white underline-offset-2 hover:underline">{lang === 'en' ? s.parentOrgEn : s.parentOrg}</a>}</dd></div>
             <div><dt className="inline text-white/55">{t('Người chịu trách nhiệm', 'Responsible person')}: </dt><dd className="inline text-white" data-testid="text-responsible">{s?.responsiblePerson} – {s?.responsibleTitle}</dd></div>
           </dl>
         </div>
