@@ -1,3 +1,4 @@
+import { usePagesDataSource } from '@/pages-data-source';
 import { Link } from 'wouter';
 import { ArrowRight, CalendarDays, Database, Download, FileText, FlaskConical, Image as ImageIcon, MapPin, PlayCircle, ShieldCheck, BookOpen, Search, Landmark, ExternalLink } from 'lucide-react';
 import {
@@ -35,6 +36,7 @@ function HomeSkeleton() {
 }
 
 export default function HomePage() {
+  const { source } = usePagesDataSource();
   const { lang, t } = usePortal();
   const label = useMenuLabel();
   useSeo(null, null);
@@ -344,7 +346,7 @@ export default function HomePage() {
 
       <div className="container-portal mt-8 flex items-center gap-2 text-xs text-muted-foreground">
         <CalendarDays className="h-3.5 w-3.5" />
-        {import.meta.env.VITE_GITHUB_PAGES === 'true' ? t('Dữ liệu mẫu tĩnh', 'Static sample data') : t('Cập nhật liên tục', 'Continuously updated')}
+        {source === 'fallback' ? t('Dữ liệu dự phòng', 'Fallback data') : source === 'snapshot' ? t('Dữ liệu mẫu tĩnh', 'Static sample data') : t('Cập nhật liên tục', 'Continuously updated')}
         · <Download className="h-3.5 w-3.5" /><a href={import.meta.env.VITE_GITHUB_PAGES === 'true' ? `${import.meta.env.BASE_URL}rss.xml` : `${import.meta.env.BASE_URL}api/rss.xml`} className="hover:text-seal">RSS</a>
       </div>
     </div>

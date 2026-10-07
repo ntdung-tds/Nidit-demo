@@ -8,6 +8,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { cn } from '@/lib/utils';
 import { asset, buildMenuTree, fmtNum, isArticlePath, usePortal, useTracker, type MenuNode } from './lib';
 import { SmartLink } from './ui';
+import { usePagesDataSource } from '@/pages-data-source';
+import { fmtDateTime } from './lib';
 
 function useMenu(location: 'main' | 'footer' | 'links') {
   const params = { location } as const;
@@ -29,7 +31,21 @@ function isActive(loc: string, url: string) {
 function DemoNotice() {
   const { data } = useGetSiteSettings();
   const { t } = usePortal();
+  const { source, capturedAt } = usePagesDataSource();
   const [hidden, setHidden] = useState(() => sessionStorage.getItem('nidit_demo_hidden') === '1');
+  if (source === 'fallback') return (
+    <div className="no-print border-b border-gold/40 bg-[hsl(42_80%_92%)] text-[hsl(32_60%_22%)]" role="status">
+      <div className="container-portal flex flex-wrap items-center gap-3 py-2 text-xs">
+        <Info className="h-3.5 w-3.5 shrink-0" />
+        <p className="min-w-0 flex-1" data-testid="text-fallback-notice">
+          {t('Máy chủ cập nhật đang gián đoạn. Trang đang hiển thị nội dung dự phòng đã lưu lúc', 'The update server is unavailable. This page is showing fallback content saved at')} {fmtDateTime(capturedAt)}.
+        </p>
+        <button onClick={() => window.location.reload()} className="shrink-0 underline underline-offset-2" data-testid="button-reconnect">
+          {t('Thử kết nối lại', 'Reconnect')}
+        </button>
+      </div>
+    </div>
+  );
   if (!data?.demoNotice || hidden) return null;
   return (
     <div className="no-print border-b border-gold/40 bg-[hsl(42_80%_92%)] text-[hsl(32_60%_22%)]" role="note">

@@ -3,6 +3,7 @@ import snapshotJson from './pages-snapshot.json';
 type JsonRecord = Record<string, any>;
 
 const data = snapshotJson as JsonRecord;
+export const snapshotCapturedAt = String(data.capturedAt);
 const labels: Record<string, string> = {
   article: 'Tin tức',
   document: 'Văn bản',
@@ -93,7 +94,7 @@ function searchResults(query: string, type?: string) {
   return { query: query.trim().slice(0, 100), total: groups.reduce((sum, group) => sum + group.total, 0), groups };
 }
 
-function resolveApi(path: string, params: URLSearchParams): unknown {
+export function resolveApi(path: string, params: URLSearchParams): unknown {
   const parts = path.split('/').filter(Boolean).map((part) => decodeURIComponent(part));
   const [resource, identifier, action] = parts;
   const q = params.get('q') ?? '';
@@ -216,32 +217,4 @@ function resolveApi(path: string, params: URLSearchParams): unknown {
   if (resource === 'search' && !identifier) return searchResults(q, params.get('type') ?? undefined);
 
   return undefined;
-}
-
-function jsonResponse(body: unknown, status = 200): Response {
-  return new Response(body === undefined ? null : JSON.stringify(body), {
-    status,
-    headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'public, max-age=300' },
-  });
-}
-
-export function installPagesDemoApi(): void {
-  const originalFetch = window.fetch.bind(window);
-  window.fetch = async (input, init) => {
-    const method = (init?.method ?? (input instanceof Request ? input.method : 'GET')).toUpperCase();
-    const rawUrl = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
-    const url = new URL(rawUrl, window.location.href);
-    const apiMatch = /\/api\/(.*)$/.exec(url.pathname);
-    if (!apiMatch) return originalFetch(input, init);
-
-    if (method !== 'GET' && method !== 'HEAD') {
-      return jsonResponse({ error: 'This GitHub Pages demo is read-only; no data was submitted or changed.' }, 405);
-    }
-
-    const result = resolveApi(apiMatch[1].replace(/\/+$/, ''), url.searchParams);
-    if (result === undefined) {
-      return jsonResponse({ error: `No static snapshot is available for /api/${apiMatch[1]}.` }, 404);
-    }
-    return jsonResponse(result);
-  };
 }
