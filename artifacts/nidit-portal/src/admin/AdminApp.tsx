@@ -70,17 +70,17 @@ function Guard({ children }: { children: ReactNode }) {
   if (error instanceof ApiError && error.status === 401) return <Redirect to="/quan-tri/dang-nhap" />;
   if (isLoading) {
     return (
-      <div className="adm-root min-h-[100dvh] bg-background flex">
-        <div className="hidden md:block w-[232px] bg-sidebar" />
-        <div className="flex-1 p-8 space-y-4">
-          <Skeleton className="h-8 w-64" /><Skeleton className="h-4 w-96" />
-          <div className="grid grid-cols-4 gap-3 pt-4">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24" />)}</div>
-          <Skeleton className="h-72" />
+      <div className="adm-root flex min-h-[100dvh] min-w-0 overflow-x-hidden bg-background">
+        <div className="hidden w-[232px] shrink-0 bg-sidebar md:block" />
+        <div className="min-w-0 flex-1 space-y-4 p-4 sm:p-6 lg:p-8">
+          <Skeleton className="h-8 w-full max-w-64" /><Skeleton className="h-4 w-full max-w-96" />
+          <div className="grid grid-cols-1 gap-3 pt-4 sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24" />)}</div>
+          <Skeleton className="h-56 sm:h-72" />
         </div>
       </div>
     );
   }
-  if (error || !me) return <div className="adm-root p-8 max-w-xl mx-auto"><ErrorBox error={error} onRetry={() => refetch()} /></div>;
+  if (error || !me) return <div className="adm-root mx-auto max-w-xl p-4 sm:p-8"><ErrorBox error={error} onRetry={() => refetch()} /></div>;
   return <AuthCtx.Provider value={me}><Shell>{children}</Shell></AuthCtx.Provider>;
 }
 
