@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Hoạt động nghiên cứu</title>
+    <link>https://ntdung-tds.github.io/Nidit-demo/</link>
+    <description>RSS tĩnh cho bản demo NIDIT.</description>
+    <language>vi-VN</language>
+    <lastBuildDate>Wed, 07 Oct 2026 16:40:43 GMT</lastBuildDate>
+    <atom:link href="https://ntdung-tds.github.io/Nidit-demo/rss-hoat-dong-nghien-cuu.xml" rel="self" type="application/rss+xml" />
+    <item><title>Viện công bố Danh mục dữ liệu phục vụ phát triển trí tuệ nhân tạo</title><link>https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/vien-cong-bo-danh-muc-du-lieu-phuc-vu-phat-trien-tri-tue-nhan-tao</link><guid isPermaLink="true">https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/vien-cong-bo-danh-muc-du-lieu-phuc-vu-phat-trien-tri-tue-nhan-tao</guid><description>Danh mục phiên bản thử nghiệm gồm 8 bộ dữ liệu văn bản, tiếng nói, hình ảnh và chỉ số chuyển đổi số, được mô tả theo chuẩn siêu dữ liệu thống nhất với điều kiện khai thác công khai, minh bạch.</description><category>Hoạt động nghiên cứu</category><pubDate>Tue, 06 Oct 2026 02:43:00 GMT</pubDate><enclosure url="https://ntdung-tds.github.io/Nidit-demo/images/du-lieu-gan-nhan.jpg" type="image/jpeg" length="0" /></item>
+<item><title>Đưa vào vận hành Phòng thí nghiệm Trí tuệ nhân tạo phục vụ nghiên cứu và thử nghiệm mô hình</title><link>https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/dua-vao-van-hanh-phong-thi-nghiem-tri-tue-nhan-tao-phuc-vu-nghien-cuu-va-thu-nghiem-mo-hinh</link><guid isPermaLink="true">https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/dua-vao-van-hanh-phong-thi-nghiem-tri-tue-nhan-tao-phuc-vu-nghien-cuu-va-thu-nghiem-mo-hinh</guid><description>Phòng thí nghiệm được trang bị cụm máy chủ GPU, hệ thống lưu trữ dữ liệu và môi trường thử nghiệm biệt lập, phục vụ các nhóm nghiên cứu trong và ngoài Viện.</description><category>Hoạt động nghiên cứu</category><pubDate>Thu, 01 Oct 2026 08:14:00 GMT</pubDate><enclosure url="https://ntdung-tds.github.io/Nidit-demo/images/news-phong-lab-ai.jpg" type="image/jpeg" length="0" /></item>
+<item><title>Nghiệm thu đề tài ứng dụng AI hỗ trợ sàng lọc hình ảnh y tế tuyến cơ sở</title><link>https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/nghiem-thu-de-tai-ung-dung-ai-ho-tro-sang-loc-hinh-anh-y-te-tuyen-co-so</link><guid isPermaLink="true">https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/nghiem-thu-de-tai-ung-dung-ai-ho-tro-sang-loc-hinh-anh-y-te-tuyen-co-so</guid><description>Mô hình đạt độ nhạy 92,4% trên tập kiểm tra độc lập; Hội đồng đánh giá cao quy trình thử nghiệm và cơ chế giám sát sau triển khai.</description><category>Hoạt động nghiên cứu</category><pubDate>Tue, 22 Sep 2026 02:24:00 GMT</pubDate><enclosure url="https://ntdung-tds.github.io/Nidit-demo/images/y-te-so.jpg" type="image/jpeg" length="0" /></item>
+  </channel>
+</rss>

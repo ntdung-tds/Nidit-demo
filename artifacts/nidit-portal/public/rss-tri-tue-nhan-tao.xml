@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Trí tuệ nhân tạo</title>
+    <link>https://ntdung-tds.github.io/Nidit-demo/</link>
+    <description>RSS tĩnh cho bản demo NIDIT.</description>
+    <language>vi-VN</language>
+    <lastBuildDate>Wed, 07 Oct 2026 16:40:43 GMT</lastBuildDate>
+    <atom:link href="https://ntdung-tds.github.io/Nidit-demo/rss-tri-tue-nhan-tao.xml" rel="self" type="application/rss+xml" />
+    <item><title>Mô hình ngôn ngữ lớn tiếng Việt: cơ hội và yêu cầu về dữ liệu chất lượng</title><link>https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/mo-hinh-ngon-ngu-lon-tieng-viet-co-hoi-va-yeu-cau-ve-du-lieu-chat-luong</link><guid isPermaLink="true">https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/mo-hinh-ngon-ngu-lon-tieng-viet-co-hoi-va-yeu-cau-ve-du-lieu-chat-luong</guid><description>Chất lượng và tính hợp pháp của dữ liệu huấn luyện là yếu tố quyết định để mô hình ngôn ngữ tiếng Việt có thể được sử dụng an toàn trong cơ quan nhà nước.</description><category>Trí tuệ nhân tạo</category><pubDate>Sat, 03 Oct 2026 03:36:00 GMT</pubDate><enclosure url="https://ntdung-tds.github.io/Nidit-demo/images/nghien-cuu-tieng-viet.jpg" type="image/jpeg" length="0" /></item>
+<item><title>Đánh giá rủi ro hệ thống trí tuệ nhân tạo: xu hướng quốc tế và gợi mở cho Việt Nam</title><link>https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/danh-gia-rui-ro-he-thong-tri-tue-nhan-tao-xu-huong-quoc-te-va-goi-mo-cho-viet-nam</link><guid isPermaLink="true">https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/danh-gia-rui-ro-he-thong-tri-tue-nhan-tao-xu-huong-quoc-te-va-goi-mo-cho-viet-nam</guid><description>Tiếp cận dựa trên rủi ro đang trở thành xu hướng chung trong quản lý AI; đánh giá độc lập trước triển khai là công cụ quan trọng để xây dựng niềm tin.</description><category>Trí tuệ nhân tạo</category><pubDate>Wed, 23 Sep 2026 03:33:00 GMT</pubDate><enclosure url="https://ntdung-tds.github.io/Nidit-demo/images/field-tri-tue-nhan-tao.jpg" type="image/jpeg" length="0" /></item>
+<item><title>Ứng dụng AI trong y tế cơ sở cần đi kèm cơ chế kiểm định độc lập</title><link>https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/ung-dung-ai-trong-y-te-co-so-can-di-kem-co-che-kiem-dinh-doc-lap</link><guid isPermaLink="true">https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/ung-dung-ai-trong-y-te-co-so-can-di-kem-co-che-kiem-dinh-doc-lap</guid><description>AI có thể giúp giảm tải cho y tế tuyến cơ sở, nhưng chỉ nên được triển khai rộng sau khi được kiểm định độc lập và có cơ chế giám sát liên tục.</description><category>Trí tuệ nhân tạo</category><pubDate>Thu, 10 Sep 2026 08:42:00 GMT</pubDate><enclosure url="https://ntdung-tds.github.io/Nidit-demo/images/field-danh-gia-kiem-dinh.jpg" type="image/jpeg" length="0" /></item>
+  </channel>
+</rss>

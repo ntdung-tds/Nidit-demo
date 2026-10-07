@@ -9,7 +9,7 @@ import {
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { DOC_GROUP_LABEL, apiUrl, buildMenuTree, fmtBytes, fmtDate, fmtNum, useQS, usePortal, useSeo } from '../lib';
+import { DOC_GROUP_LABEL, apiUrl, asset, buildMenuTree, fmtBytes, fmtDate, fmtNum, useQS, usePortal, useSeo } from '../lib';
 import { EmptyState, ErrorState, FacetButton, Img, ListSkeleton, PageHeader, PageSkeleton, Pagination, SectionHead, SideBox, SmartLink, Tag } from '../ui';
 import NotFoundPage from './NotFound';
 
@@ -18,6 +18,12 @@ function useDownload() {
   const dl = useRecordDocumentDownload();
   const [busy, setBusy] = useState<number | null>(null);
   const go = (d: DocumentItem) => {
+    if (import.meta.env.VITE_GITHUB_PAGES === 'true') {
+      if (!d.fileUrl) return;
+      const url = /^https?:\/\//i.test(d.fileUrl) ? d.fileUrl : asset(d.fileUrl);
+      window.open(url, '_blank', 'noopener');
+      return;
+    }
     setBusy(d.id);
     const w = d.fileUrl ? null : window.open('', '_blank');
     if (d.fileUrl) window.open(d.fileUrl, '_blank', 'noopener');
@@ -356,7 +362,15 @@ export function RssPage() {
   const [copied, setCopied] = useState<string | null>(null);
   const [, nav] = useLocation();
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  const feeds = [{ key: 'all', name: t('Tất cả tin bài', 'All news'), url: apiUrl('rss') }, ...(cats.data ?? []).filter((c) => c.isVisible).map((c) => ({ key: c.slug, name: lang === 'en' && c.nameEn ? c.nameEn : c.name, url: apiUrl(`rss?category=${c.slug}`) }))];
+  const staticDemo = import.meta.env.VITE_GITHUB_PAGES === 'true';
+  const feeds = [
+    { key: 'all', name: t('Tất cả tin bài', 'All news'), url: staticDemo ? asset('rss.xml') : apiUrl('rss') },
+    ...(cats.data ?? []).filter((c) => c.isVisible).map((c) => ({
+      key: c.slug,
+      name: lang === 'en' && c.nameEn ? c.nameEn : c.name,
+      url: staticDemo ? asset(`rss-${c.slug}.xml`) : apiUrl(`rss?category=${c.slug}`),
+    })),
+  ];
   const copy = (k: string, u: string) => navigator.clipboard?.writeText(origin + u).then(() => { setCopied(k); setTimeout(() => setCopied(null), 1600); });
   return (
     <>

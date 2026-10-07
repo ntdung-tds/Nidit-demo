@@ -137,6 +137,7 @@ export function useTracker() {
   const mutate = track.mutate;
   return useCallback(
     (path: string, articleId?: number | null) => {
+      if (import.meta.env.VITE_GITHUB_PAGES === 'true') return;
       try {
         mutate({ data: { path, articleId: articleId ?? null, referrer: document.referrer || null } });
       } catch {

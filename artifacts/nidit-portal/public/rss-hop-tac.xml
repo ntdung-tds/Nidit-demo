@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Hợp tác trong nước và quốc tế</title>
+    <link>https://ntdung-tds.github.io/Nidit-demo/</link>
+    <description>RSS tĩnh cho bản demo NIDIT.</description>
+    <language>vi-VN</language>
+    <lastBuildDate>Wed, 07 Oct 2026 16:40:43 GMT</lastBuildDate>
+    <atom:link href="https://ntdung-tds.github.io/Nidit-demo/rss-hop-tac.xml" rel="self" type="application/rss+xml" />
+    <item><title>Ký kết thỏa thuận hợp tác nghiên cứu, đào tạo về công nghệ số với các trường đại học kỹ thuật</title><link>https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/ky-ket-thoa-thuan-hop-tac-nghien-cuu-dao-tao-ve-cong-nghe-so-voi-cac-truong-dai-hoc-ky-thuat</link><guid isPermaLink="true">https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/ky-ket-thoa-thuan-hop-tac-nghien-cuu-dao-tao-ve-cong-nghe-so-voi-cac-truong-dai-hoc-ky-thuat</guid><description>Thỏa thuận giai đoạn 2026–2030 tập trung vào nghiên cứu chung, chia sẻ hạ tầng phòng thí nghiệm, thực tập cho sinh viên và đồng hướng dẫn nghiên cứu sinh.</description><category>Hợp tác trong nước và quốc tế</category><pubDate>Sun, 04 Oct 2026 03:31:00 GMT</pubDate><enclosure url="https://ntdung-tds.github.io/Nidit-demo/images/news-ky-ket.jpg" type="image/jpeg" length="0" /></item>
+<item><title>Đoàn công tác của Viện làm việc với các địa phương thí điểm nền tảng đô thị thông minh</title><link>https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/doan-cong-tac-cua-vien-lam-viec-voi-cac-dia-phuong-thi-diem-nen-tang-do-thi-thong-minh</link><guid isPermaLink="true">https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/doan-cong-tac-cua-vien-lam-viec-voi-cac-dia-phuong-thi-diem-nen-tang-do-thi-thong-minh</guid><description>Đoàn khảo sát hiện trạng hạ tầng, dữ liệu và trao đổi phương án mở rộng nền tảng IoT giám sát hạ tầng đô thị sau giai đoạn thí điểm.</description><category>Hợp tác trong nước và quốc tế</category><pubDate>Fri, 25 Sep 2026 04:15:00 GMT</pubDate><enclosure url="https://ntdung-tds.github.io/Nidit-demo/images/news-doan-cong-tac.jpg" type="image/jpeg" length="0" /></item>
+<item><title>Làm việc với đoàn chuyên gia quốc tế về quản trị dữ liệu và AI có trách nhiệm</title><link>https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/lam-viec-voi-doan-chuyen-gia-quoc-te-ve-quan-tri-du-lieu-va-ai-co-trach-nhiem</link><guid isPermaLink="true">https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/lam-viec-voi-doan-chuyen-gia-quoc-te-ve-quan-tri-du-lieu-va-ai-co-trach-nhiem</guid><description>Hai bên chia sẻ kinh nghiệm xây dựng khung quản trị dữ liệu, đánh giá rủi ro AI và trao đổi khả năng hợp tác nghiên cứu chuẩn trao đổi dữ liệu y tế.</description><category>Hợp tác trong nước và quốc tế</category><pubDate>Sat, 19 Sep 2026 08:04:00 GMT</pubDate><enclosure url="https://ntdung-tds.github.io/Nidit-demo/images/news-hop-tac-quoc-te.jpg" type="image/jpeg" length="0" /></item>
+  </channel>
+</rss>

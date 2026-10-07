@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Dữ liệu số</title>
+    <link>https://ntdung-tds.github.io/Nidit-demo/</link>
+    <description>RSS tĩnh cho bản demo NIDIT.</description>
+    <language>vi-VN</language>
+    <lastBuildDate>Wed, 07 Oct 2026 16:40:43 GMT</lastBuildDate>
+    <atom:link href="https://ntdung-tds.github.io/Nidit-demo/rss-du-lieu-so.xml" rel="self" type="application/rss+xml" />
+    <item><title>Luật Dữ liệu và yêu cầu chuẩn hóa dữ liệu dùng chung trong cơ quan nhà nước</title><link>https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/luat-du-lieu-va-yeu-cau-chuan-hoa-du-lieu-dung-chung-trong-co-quan-nha-nuoc</link><guid isPermaLink="true">https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/luat-du-lieu-va-yeu-cau-chuan-hoa-du-lieu-dung-chung-trong-co-quan-nha-nuoc</guid><description>Luật Dữ liệu có hiệu lực từ 01/7/2025 đặt ra yêu cầu cao hơn về quản trị, chất lượng và chia sẻ dữ liệu giữa các cơ quan nhà nước.</description><category>Dữ liệu số</category><pubDate>Tue, 29 Sep 2026 02:10:00 GMT</pubDate><enclosure url="https://ntdung-tds.github.io/Nidit-demo/images/news-trung-tam-du-lieu.jpg" type="image/jpeg" length="0" /></item>
+<item><title>Gán nhãn dữ liệu: công đoạn thầm lặng quyết định chất lượng mô hình AI</title><link>https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/gan-nhan-du-lieu-cong-doan-tham-lang-quyet-dinh-chat-luong-mo-hinh-ai</link><guid isPermaLink="true">https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/gan-nhan-du-lieu-cong-doan-tham-lang-quyet-dinh-chat-luong-mo-hinh-ai</guid><description>Quy trình gán nhãn có kiểm soát, đo độ đồng thuận và rà soát chéo giúp nâng cao chất lượng dữ liệu huấn luyện, giảm thiên lệch của mô hình.</description><category>Dữ liệu số</category><pubDate>Fri, 18 Sep 2026 02:03:00 GMT</pubDate><enclosure url="https://ntdung-tds.github.io/Nidit-demo/images/field-du-lieu.jpg" type="image/jpeg" length="0" /></item>
+  </channel>
+</rss>

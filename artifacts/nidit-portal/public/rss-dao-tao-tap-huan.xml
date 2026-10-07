@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Đào tạo, tập huấn</title>
+    <link>https://ntdung-tds.github.io/Nidit-demo/</link>
+    <description>RSS tĩnh cho bản demo NIDIT.</description>
+    <language>vi-VN</language>
+    <lastBuildDate>Wed, 07 Oct 2026 16:40:43 GMT</lastBuildDate>
+    <atom:link href="https://ntdung-tds.github.io/Nidit-demo/rss-dao-tao-tap-huan.xml" rel="self" type="application/rss+xml" />
+    <item><title>Tập huấn kỹ năng số và an toàn thông tin cho cán bộ, công chức năm 2026</title><link>https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/tap-huan-ky-nang-so-va-an-toan-thong-tin-cho-can-bo-cong-chuc-nam-2026</link><guid isPermaLink="true">https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/tap-huan-ky-nang-so-va-an-toan-thong-tin-cho-can-bo-cong-chuc-nam-2026</guid><description>Khóa tập huấn kéo dài 3 ngày, trang bị kỹ năng khai thác nền tảng số, nhận diện lừa đảo trực tuyến và bảo vệ dữ liệu cá nhân trong công việc.</description><category>Đào tạo, tập huấn</category><pubDate>Mon, 28 Sep 2026 07:02:00 GMT</pubDate><enclosure url="https://ntdung-tds.github.io/Nidit-demo/images/news-tap-huan.jpg" type="image/jpeg" length="0" /></item>
+<item><title>Khai giảng khóa bồi dưỡng chuyên gia chuyển đổi số cho cán bộ cấp xã</title><link>https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/khai-giang-khoa-boi-duong-chuyen-gia-chuyen-doi-so-cho-can-bo-cap-xa</link><guid isPermaLink="true">https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/khai-giang-khoa-boi-duong-chuyen-gia-chuyen-doi-so-cho-can-bo-cap-xa</guid><description>Chương trình 6 tuần kết hợp trực tuyến và trực tiếp, giúp cán bộ cấp xã lập kế hoạch, triển khai và đánh giá hiệu quả chuyển đổi số tại địa phương.</description><category>Đào tạo, tập huấn</category><pubDate>Wed, 16 Sep 2026 01:15:00 GMT</pubDate><enclosure url="https://ntdung-tds.github.io/Nidit-demo/images/field-chuyen-doi-so.jpg" type="image/jpeg" length="0" /></item>
+  </channel>
+</rss>

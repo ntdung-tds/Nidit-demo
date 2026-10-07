@@ -303,7 +303,7 @@ function Footer() {
             ))}
             <li><Link href="/so-do-trang" className="inline-flex items-center gap-1 hover:text-white" data-testid="link-sitemap"><Network className="h-3 w-3" />{t('Sơ đồ trang', 'Sitemap')}</Link></li>
             <li><Link href="/rss" className="inline-flex items-center gap-1 hover:text-white" data-testid="link-rss"><Rss className="h-3 w-3" />RSS</Link></li>
-            <li><Link href="/quan-tri" className="inline-flex items-center gap-1 text-white/35 hover:text-white" data-testid="link-admin"><Users className="h-3 w-3" />{t('Quản trị', 'Admin')}</Link></li>
+            {import.meta.env.VITE_GITHUB_PAGES !== 'true' && <li><Link href="/quan-tri" className="inline-flex items-center gap-1 text-white/35 hover:text-white" data-testid="link-admin"><Users className="h-3 w-3" />{t('Quản trị', 'Admin')}</Link></li>}
           </ul>
         </div>
       </div>

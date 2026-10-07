@@ -111,6 +111,27 @@ export function DatasetDetailPage() {
       document.getElementById('dang-ky')?.scrollIntoView({ behavior: 'smooth' });
       return;
     }
+    if (import.meta.env.VITE_GITHUB_PAGES === 'true') {
+      if (d.accessLevel !== 'open') {
+        toast({
+          title: t('Yêu cầu truy cập đã tắt', 'Access requests are disabled'),
+          description: t('Bản demo tĩnh không tiếp nhận hoặc lưu yêu cầu khai thác dữ liệu.', 'This static demo cannot accept or store data access requests.'),
+        });
+        document.getElementById('dang-ky')?.scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+      if (/^https?:\/\//i.test(m.url)) {
+        window.open(m.url, '_blank', 'noopener');
+      } else if (m.url.startsWith('/files/')) {
+        window.open(asset(m.url), '_blank', 'noopener');
+      } else {
+        toast({
+          title: t('Nguồn dữ liệu không có trong bản demo', 'Data source is not included in this demo'),
+          description: t('Bản demo tĩnh chỉ hiển thị thông tin mô tả, không kết nối nguồn dữ liệu trực tiếp.', 'The static demo displays metadata only and does not connect to live data sources.'),
+        });
+      }
+      return;
+    }
     const storage = m.url.startsWith('s3://');
     setPending(m.type);
     // Mở sẵn cửa sổ trong lúc người dùng bấm để trình duyệt không chặn cửa sổ bật lên

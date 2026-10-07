@@ -343,7 +343,9 @@ export default function HomePage() {
       </section>
 
       <div className="container-portal mt-8 flex items-center gap-2 text-xs text-muted-foreground">
-        <CalendarDays className="h-3.5 w-3.5" />{t('Cập nhật liên tục', 'Continuously updated')} · <Download className="h-3.5 w-3.5" /><a href={`${import.meta.env.BASE_URL}api/rss.xml`} className="hover:text-seal">RSS</a>
+        <CalendarDays className="h-3.5 w-3.5" />
+        {import.meta.env.VITE_GITHUB_PAGES === 'true' ? t('Dữ liệu mẫu tĩnh', 'Static sample data') : t('Cập nhật liên tục', 'Continuously updated')}
+        · <Download className="h-3.5 w-3.5" /><a href={import.meta.env.VITE_GITHUB_PAGES === 'true' ? `${import.meta.env.BASE_URL}rss.xml` : `${import.meta.env.BASE_URL}api/rss.xml`} className="hover:text-seal">RSS</a>
       </div>
     </div>
   );

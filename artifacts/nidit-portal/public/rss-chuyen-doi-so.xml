@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Chuyển đổi số</title>
+    <link>https://ntdung-tds.github.io/Nidit-demo/</link>
+    <description>RSS tĩnh cho bản demo NIDIT.</description>
+    <language>vi-VN</language>
+    <lastBuildDate>Wed, 07 Oct 2026 16:40:43 GMT</lastBuildDate>
+    <atom:link href="https://ntdung-tds.github.io/Nidit-demo/rss-chuyen-doi-so.xml" rel="self" type="application/rss+xml" />
+    <item><title>Chuyển đổi số khu vực công: từ số hóa hồ sơ đến vận hành dựa trên dữ liệu</title><link>https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/chuyen-doi-so-khu-vuc-cong-tu-so-hoa-ho-so-den-van-hanh-dua-tren-du-lieu</link><guid isPermaLink="true">https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/chuyen-doi-so-khu-vuc-cong-tu-so-hoa-ho-so-den-van-hanh-dua-tren-du-lieu</guid><description>Số hóa mới là bước đầu. Giá trị của chuyển đổi số khu vực công nằm ở khả năng dùng dữ liệu để thiết kế lại quy trình, ra quyết định và đo lường hiệu quả phục vụ.</description><category>Chuyển đổi số</category><pubDate>Mon, 05 Oct 2026 00:08:00 GMT</pubDate><enclosure url="https://ntdung-tds.github.io/Nidit-demo/images/news-dich-vu-cong.jpg" type="image/jpeg" length="0" /></item>
+<item><title>Đô thị thông minh: bài toán kết nối dữ liệu cảm biến và nền tảng điều hành</title><link>https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/do-thi-thong-minh-bai-toan-ket-noi-du-lieu-cam-bien-va-nen-tang-dieu-hanh</link><guid isPermaLink="true">https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/do-thi-thong-minh-bai-toan-ket-noi-du-lieu-cam-bien-va-nen-tang-dieu-hanh</guid><description>Kinh nghiệm từ các mô hình thí điểm cho thấy chuẩn hóa dữ liệu cảm biến và thiết kế nền tảng mở là điều kiện để đô thị thông minh phát triển bền vững.</description><category>Chuyển đổi số</category><pubDate>Sat, 26 Sep 2026 01:10:00 GMT</pubDate><enclosure url="https://ntdung-tds.github.io/Nidit-demo/images/news-thanh-pho-thong-minh.jpg" type="image/jpeg" length="0" /></item>
+<item><title>Hạ tầng IoT cho nông nghiệp và môi trường: kinh nghiệm từ các mô hình thí điểm</title><link>https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/ha-tang-iot-cho-nong-nghiep-va-moi-truong-kinh-nghiem-tu-cac-mo-hinh-thi-diem</link><guid isPermaLink="true">https://ntdung-tds.github.io/Nidit-demo/#/tin-tuc/ha-tang-iot-cho-nong-nghiep-va-moi-truong-kinh-nghiem-tu-cac-mo-hinh-thi-diem</guid><description>Chi phí thiết bị giảm mạnh mở ra cơ hội ứng dụng IoT rộng rãi, nhưng vận hành, bảo trì và khai thác dữ liệu mới là yếu tố quyết định hiệu quả.</description><category>Chuyển đổi số</category><pubDate>Sun, 13 Sep 2026 03:46:00 GMT</pubDate><enclosure url="https://ntdung-tds.github.io/Nidit-demo/images/ha-tang-iot.jpg" type="image/jpeg" length="0" /></item>
+  </channel>
+</rss>

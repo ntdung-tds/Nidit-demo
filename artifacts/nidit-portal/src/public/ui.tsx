@@ -252,6 +252,14 @@ export function InquiryForm({ type, datasetId, serviceId, subjectDefault, compac
   const [errors, setErrors] = useState<Record<string, string>>({});
   const upd = (k: keyof typeof form) => (e: { target: { value: string } }) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
+  if (import.meta.env.VITE_GITHUB_PAGES === 'true') {
+    return (
+      <div className="border border-gold/40 bg-[hsl(42_80%_92%)] p-4 text-sm text-[hsl(32_60%_22%)]" role="note">
+        {t('Biểu mẫu đã tắt trong bản demo tĩnh; không có thông tin nào được gửi hoặc lưu.', 'Forms are disabled in this static demo; no information is submitted or stored.')}
+      </div>
+    );
+  }
+
   const submit = (e: FormEvent) => {
     e.preventDefault();
     const er: Record<string, string> = {};

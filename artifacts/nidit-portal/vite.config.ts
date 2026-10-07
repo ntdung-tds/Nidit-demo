@@ -1,7 +1,7 @@
 import path from 'path';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 
 import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
 
@@ -27,9 +27,23 @@ if (!basePath) {
   );
 }
 
+const pagesDemoEntry: Plugin = {
+  name: 'nidit-pages-demo-entry',
+  transformIndexHtml: {
+    order: 'pre',
+    handler(html) {
+      if (process.env.VITE_GITHUB_PAGES !== 'true') return html;
+      return html
+        .replace('/src/main.tsx', '/src/pages-main.tsx')
+        .replace('href="/api/rss.xml"', `href="${basePath}rss.xml"`);
+    },
+  },
+};
+
 export default defineConfig({
   base: basePath,
   plugins: [
+    pagesDemoEntry,
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
