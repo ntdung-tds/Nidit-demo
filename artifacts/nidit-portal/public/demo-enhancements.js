@@ -12,15 +12,10 @@
     if (!el) return;
     const spans = el.querySelectorAll('span.sm\\:hidden');
     if (spans.length < 2) return;
-
     const logoLink = el.closest('[data-testid="link-home-logo"]');
     if (logoLink) logoLink.style.flex = '1 1 auto';
     const textWrap = el.parentElement;
-    if (textWrap) {
-      textWrap.style.flex = '1 1 auto';
-      textWrap.style.minWidth = '0';
-    }
-
+    if (textWrap) { textWrap.style.flex = '1 1 auto'; textWrap.style.minWidth = '0'; }
     el.style.lineHeight = '1.22';
     el.style.width = '100%';
     spans[0].style.fontSize = 'clamp(0.84rem, 4vw, 1.04rem)';
@@ -38,12 +33,9 @@
     return CRM_PATH;
   }
 
-  /** Keep a single top-level Login row immediately after the top-level Contact row. */
   function patchMobileLoginRow() {
     const dialog = document.querySelector('[role="dialog"]');
     if (!dialog) return;
-
-    Array.from(dialog.querySelectorAll('[data-demo-account-row="1"], [data-demo-login-row="1"]')).forEach((el) => el.remove());
 
     const oldLabels = new Set([
       'quản trị viên demo', 'quản trị / crm', 'đăng nhập / quản trị crm', 'mở quản trị / crm',
@@ -51,22 +43,30 @@
       'open admin / crm', 'sign out of admin',
     ]);
     Array.from(dialog.querySelectorAll('a,button')).forEach((el) => {
+      if (el.closest('[data-demo-login-row="1"]')) return;
       if (!oldLabels.has(lower(el))) return;
       const li = el.closest('li');
       if (li) li.remove();
       else el.remove();
     });
+    Array.from(dialog.querySelectorAll('[data-demo-account-row="1"]')).forEach((el) => el.remove());
 
-    const links = Array.from(dialog.querySelectorAll('a'));
-    const contact = links.find((a) => lower(a) === 'liên hệ');
+    const contact = Array.from(dialog.querySelectorAll('a')).find((a) => lower(a) === 'liên hệ');
     if (!contact) return;
     const contactLi = contact.closest('li');
     if (!contactLi || !contactLi.parentElement) return;
 
-    const row = document.createElement('li');
+    let row = dialog.querySelector('[data-demo-login-row="1"]');
+    if (row) {
+      if (row.previousElementSibling !== contactLi) contactLi.insertAdjacentElement('afterend', row);
+      const existingLink = row.querySelector('a');
+      if (existingLink) existingLink.href = buildCrmHref(contact.getAttribute('href'));
+      return;
+    }
+
+    row = document.createElement('li');
     row.dataset.demoLoginRow = '1';
     row.className = contactLi.className;
-
     const login = document.createElement('a');
     login.href = buildCrmHref(contact.getAttribute('href'));
     login.className = contact.className;
@@ -76,17 +76,14 @@
     contactLi.insertAdjacentElement('afterend', row);
   }
 
-  /** Add the two deputy directors already present in the demo leadership data. */
   function patchOrgLeadershipChart() {
     if (!location.hash.startsWith(ORG_PATH)) return;
     if (document.querySelector('[data-demo-deputy-leaders="1"]')) return;
-
     const leadershipLabel = Array.from(document.querySelectorAll('div')).find((el) => lower(el) === 'lãnh đạo viện');
     if (!leadershipLabel) return;
     const topCard = leadershipLabel.closest('.border-2');
     const chart = topCard?.parentElement;
     if (!topCard || !chart) return;
-
     const horizontalLine = Array.from(chart.children).find((el) => el.classList?.contains('h-px'));
     if (!horizontalLine) return;
 
@@ -97,25 +94,15 @@
     deputies.style.gridTemplateColumns = 'repeat(2,minmax(0,1fr))';
     deputies.style.gap = '12px';
     deputies.style.alignItems = 'start';
-
-    [
-      ['Trần Quốc Hưng', 'Phó Viện trưởng'],
-      ['Lê Thị Minh Phương', 'Phó Viện trưởng'],
-    ].forEach(([name, position]) => {
+    [['Trần Quốc Hưng', 'Phó Viện trưởng'], ['Lê Thị Minh Phương', 'Phó Viện trưởng']].forEach(([name, position]) => {
       const branch = document.createElement('div');
       branch.style.display = 'flex';
       branch.style.minWidth = '0';
       branch.style.flexDirection = 'column';
       branch.style.alignItems = 'center';
-      branch.innerHTML = `
-        <div style="height:24px;width:1px;background:#173f7a"></div>
-        <div style="width:100%;box-sizing:border-box;border:2px solid #173f7a;background:#fff;padding:11px 8px;text-align:center;color:#102b55">
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#b42318">${position}</div>
-          <div style="margin-top:4px;font-family:Georgia,'Times New Roman',serif;font-size:clamp(11px,2.8vw,14px);font-weight:700;line-height:1.25">${name}</div>
-        </div>`;
+      branch.innerHTML = `<div style="height:24px;width:1px;background:#173f7a"></div><div style="width:100%;box-sizing:border-box;border:2px solid #173f7a;background:#fff;padding:11px 8px;text-align:center;color:#102b55"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#b42318">${position}</div><div style="margin-top:4px;font-family:Georgia,'Times New Roman',serif;font-size:clamp(11px,2.8vw,14px);font-weight:700;line-height:1.25">${name}</div></div>`;
       deputies.appendChild(branch);
     });
-
     horizontalLine.insertAdjacentElement('afterend', deputies);
   }
 
@@ -127,27 +114,10 @@
     if (!location.hash.startsWith(CONTACT_PATH)) return;
     const note = Array.from(document.querySelectorAll('[role="note"],div')).find((el) => text(el).startsWith('Biểu mẫu đã tắt trong bản demo tĩnh'));
     if (!note || note.dataset.demoContactForm === '1') return;
-
     const wrap = document.createElement('div');
     wrap.dataset.demoContactForm = '1';
-    wrap.innerHTML = `
-      <form data-contact-demo-form style="display:block">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0 16px">
-          ${field('Họ và tên', 'fullName', 'text', true)}
-          ${field('Email', 'email', 'email', true)}
-          ${field('Điện thoại', 'phone')}
-          ${field('Cơ quan, đơn vị', 'organization')}
-        </div>
-        ${field('Tiêu đề', 'subject')}
-        <label style="display:block;font-size:12px;font-weight:600;margin-bottom:14px">Nội dung <span style="color:#b42318">*</span><textarea name="message" required rows="5" style="display:block;width:100%;margin-top:6px;border:1px solid #cfd4dc;background:#fff;padding:10px 11px;font:inherit;box-sizing:border-box;resize:vertical"></textarea></label>
-        <div data-contact-demo-error style="display:none;color:#b42318;font-size:12px;margin:-4px 0 12px"></div>
-        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
-          <button type="submit" style="border:0;background:#173f7a;color:#fff;padding:10px 16px;font-weight:700;cursor:pointer">Gửi yêu cầu</button>
-          <span style="font-size:11px;color:#667085">Bản demo: dữ liệu chỉ được xử lý tạm thời trên trình duyệt, không lưu lên máy chủ.</span>
-        </div>
-      </form>`;
+    wrap.innerHTML = `<form data-contact-demo-form style="display:block"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0 16px">${field('Họ và tên', 'fullName', 'text', true)}${field('Email', 'email', 'email', true)}${field('Điện thoại', 'phone')}${field('Cơ quan, đơn vị', 'organization')}</div>${field('Tiêu đề', 'subject')}<label style="display:block;font-size:12px;font-weight:600;margin-bottom:14px">Nội dung <span style="color:#b42318">*</span><textarea name="message" required rows="5" style="display:block;width:100%;margin-top:6px;border:1px solid #cfd4dc;background:#fff;padding:10px 11px;font:inherit;box-sizing:border-box;resize:vertical"></textarea></label><div data-contact-demo-error style="display:none;color:#b42318;font-size:12px;margin:-4px 0 12px"></div><div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px"><button type="submit" style="border:0;background:#173f7a;color:#fff;padding:10px 16px;font-weight:700;cursor:pointer">Gửi yêu cầu</button><span style="font-size:11px;color:#667085">Bản demo: dữ liệu chỉ được xử lý tạm thời trên trình duyệt, không lưu lên máy chủ.</span></div></form>`;
     note.replaceWith(wrap);
-
     const form = wrap.querySelector('form');
     form?.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -160,11 +130,7 @@
       if (!name) msg = 'Vui lòng nhập họ và tên.';
       else if (!/^\S+@\S+\.\S+$/.test(email)) msg = 'Email chưa đúng định dạng.';
       else if (message.length < 10) msg = 'Nội dung cần tối thiểu 10 ký tự.';
-      if (msg) {
-        err.textContent = msg;
-        err.style.display = 'block';
-        return;
-      }
+      if (msg) { err.textContent = msg; err.style.display = 'block'; return; }
       const code = `NIDIT-DEMO-${new Date().toISOString().slice(0,10).replaceAll('-','')}-${Math.floor(1000 + Math.random()*9000)}`;
       wrap.innerHTML = `<div style="border:1px solid #93a9c7;background:#f2f6fb;padding:20px"><div style="font-size:18px;font-weight:700;color:#173f7a">Đã tiếp nhận yêu cầu demo</div><p style="margin:8px 0 0;font-size:13px;color:#5d6675">Thông tin đã được kiểm tra hợp lệ trên trình duyệt. Bản demo không ghi dữ liệu vào hệ thống thật.</p><div style="display:inline-block;margin-top:14px;border:1px dashed #173f7a;background:#fff;padding:8px 12px;font-weight:700;color:#173f7a">${code}</div></div>`;
     });
@@ -172,44 +138,21 @@
 
   function patchContactMap() {
     if (!location.hash.startsWith(CONTACT_PATH)) return;
-    const fallbacks = Array.from(document.querySelectorAll('.img-fallback'));
-    const mapFallback = fallbacks.find((el) => el.querySelector('svg'));
+    const mapFallback = Array.from(document.querySelectorAll('.img-fallback')).find((el) => el.querySelector('svg'));
     if (!mapFallback || mapFallback.dataset.demoMap === '1') return;
     const container = mapFallback.parentElement;
     if (!container) return;
-
     const contactBlock = Array.from(document.querySelectorAll('ul')).find((ul) => text(ul).includes('Email') || ul.querySelector('a[href^="mailto:"]'));
     const address = contactBlock ? text(contactBlock.querySelector('li')) : 'Hà Nội, Việt Nam';
     const iframe = document.createElement('iframe');
     iframe.src = `https://www.google.com/maps?q=${encodeURIComponent(address || 'Hà Nội, Việt Nam')}&output=embed`;
-    iframe.title = 'Bản đồ vị trí Viện';
-    iframe.loading = 'lazy';
-    iframe.referrerPolicy = 'no-referrer-when-downgrade';
-    iframe.style.width = '100%';
-    iframe.style.height = '100%';
-    iframe.style.border = '0';
-    iframe.dataset.demoMap = '1';
+    iframe.title = 'Bản đồ vị trí Viện'; iframe.loading = 'lazy'; iframe.referrerPolicy = 'no-referrer-when-downgrade'; iframe.style.width = '100%'; iframe.style.height = '100%'; iframe.style.border = '0'; iframe.dataset.demoMap = '1';
     container.replaceChildren(iframe);
   }
 
-  function patchAll() {
-    patchMobileMasthead();
-    patchMobileLoginRow();
-    patchOrgLeadershipChart();
-    patchContactForm();
-    patchContactMap();
-  }
-
+  function patchAll() { patchMobileMasthead(); patchMobileLoginRow(); patchOrgLeadershipChart(); patchContactForm(); patchContactMap(); }
   let scheduled = false;
-  const schedulePatch = () => {
-    if (scheduled) return;
-    scheduled = true;
-    requestAnimationFrame(() => {
-      scheduled = false;
-      patchAll();
-    });
-  };
-
+  const schedulePatch = () => { if (scheduled) return; scheduled = true; requestAnimationFrame(() => { scheduled = false; patchAll(); }); };
   const observer = new MutationObserver(schedulePatch);
   observer.observe(document.documentElement, { childList: true, subtree: true });
   window.addEventListener('hashchange', () => setTimeout(schedulePatch, 20));
