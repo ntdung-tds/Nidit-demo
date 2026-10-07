@@ -1,55 +1,6 @@
 (() => {
-  const CRM_PATH = '#/quan-tri';
   const CONTACT_PATH = '#/lien-he';
-
-  const isMobile = () => window.matchMedia('(max-width: 639px)').matches;
   const text = (el) => (el?.textContent || '').replace(/\s+/g, ' ').trim();
-
-  function patchMobileMasthead() {
-    if (!isMobile()) return;
-    const el = document.querySelector('[data-testid="text-site-name"]');
-    if (!el) return;
-    const current = text(el).toLowerCase();
-    if (!current.includes('viện công nghệ số') || !current.includes('chuyển đổi số quốc gia')) return;
-    if (el.dataset.mobileTwoLine === '1') return;
-    el.innerHTML = '<span style="display:block">Viện Công nghệ số</span><span style="display:block">và Chuyển đổi số quốc gia</span>';
-    el.dataset.mobileTwoLine = '1';
-  }
-
-  function patchMobileCrmLink() {
-    const dialog = document.querySelector('[role="dialog"]');
-    if (!dialog) return;
-    const contact = Array.from(dialog.querySelectorAll('a')).find((a) => {
-      const href = a.getAttribute('href') || '';
-      return href.includes('/lien-he') || text(a).toLowerCase().includes('liên hệ');
-    });
-    if (!contact) return;
-
-    if (!dialog.querySelector('[data-demo-crm-inline="1"]')) {
-      const sourceLi = contact.closest('li');
-      if (sourceLi && sourceLi.parentElement) {
-        const li = document.createElement('li');
-        li.dataset.demoCrmInline = '1';
-        li.innerHTML = `<a href="${CRM_PATH}" class="${contact.className}">Quản trị / CRM</a>`;
-        sourceLi.insertAdjacentElement('afterend', li);
-      } else {
-        const a = document.createElement('a');
-        a.dataset.demoCrmInline = '1';
-        a.href = CRM_PATH;
-        a.className = contact.className;
-        a.textContent = 'Quản trị / CRM';
-        contact.insertAdjacentElement('afterend', a);
-      }
-    }
-
-    Array.from(dialog.querySelectorAll('a,button')).forEach((el) => {
-      const t = text(el).toLowerCase();
-      if (t === 'đăng nhập / quản trị crm' || t === 'mở quản trị / crm' || t === 'sign in / admin crm' || t === 'open admin / crm') {
-        const box = el.closest('.border-t');
-        if (box && !box.querySelector('[data-demo-crm-inline="1"]')) box.style.display = 'none';
-      }
-    });
-  }
 
   function field(label, name, type = 'text', required = false) {
     return `<label style="display:block;font-size:12px;font-weight:600;margin-bottom:14px">${label}${required ? ' <span style="color:#b42318">*</span>' : ''}<input name="${name}" type="${type}" ${required ? 'required' : ''} style="display:block;width:100%;margin-top:6px;border:1px solid #cfd4dc;background:#fff;padding:10px 11px;font:inherit;box-sizing:border-box" /></label>`;
@@ -125,8 +76,6 @@
   }
 
   function patchAll() {
-    patchMobileMasthead();
-    patchMobileCrmLink();
     patchContactForm();
     patchContactMap();
   }
@@ -134,7 +83,6 @@
   const observer = new MutationObserver(() => requestAnimationFrame(patchAll));
   observer.observe(document.documentElement, { childList: true, subtree: true });
   window.addEventListener('hashchange', () => setTimeout(patchAll, 20));
-  window.addEventListener('resize', patchAll);
   document.addEventListener('DOMContentLoaded', patchAll);
   patchAll();
 })();
