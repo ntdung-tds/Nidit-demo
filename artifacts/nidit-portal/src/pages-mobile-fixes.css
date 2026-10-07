@@ -1,0 +1,38 @@
+/* GitHub Pages demo: harden mobile layout against accidental horizontal overflow. */
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+@supports (overflow: clip) {
+  html,
+  body,
+  #root {
+    overflow-x: clip;
+  }
+}
+
+@media (max-width: 1023.98px) {
+  .container-portal,
+  .container-portal > *,
+  main,
+  main > *,
+  section,
+  article,
+  aside,
+  nav {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  img,
+  video,
+  canvas,
+  iframe,
+  svg {
+    max-width: 100%;
+  }
+}
