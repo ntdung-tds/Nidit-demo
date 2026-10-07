@@ -107,7 +107,6 @@ function TopBar() {
             ))}
           </div>
           <Link href="/rss" className="hidden items-center gap-1 hover:text-white md:flex" data-testid="link-rss-top"><Rss className="h-3 w-3" />RSS</Link>
-          <Link href="/quan-tri" className="hidden items-center gap-1 border-l border-white/20 pl-3 font-semibold text-white/80 hover:text-white md:flex" data-testid="link-admin-top"><Users className="h-3 w-3" />{t('Quản trị / CRM', 'Admin / CRM')}</Link>
         </div>
       </div>
     </div>
@@ -148,8 +147,16 @@ function Masthead() {
             <div className="text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-seal md:text-[0.7rem]">
               {lang === 'en' ? (s?.parentOrgEn ?? 'Ministry of Science and Technology') : (s?.parentOrg ?? 'Bộ Khoa học và Công nghệ')}
             </div>
-            <div className="font-display text-[1rem] font-bold uppercase leading-tight text-navy sm:text-[1.2rem] md:text-[1.55rem] lg:whitespace-nowrap" data-testid="text-site-name">
-              {lang === 'en' ? nameEn : name}
+            <div className="font-display font-bold uppercase leading-[1.08] text-navy sm:text-[1.2rem] md:text-[1.55rem] lg:whitespace-nowrap" data-testid="text-site-name">
+              {lang === 'vi' ? (
+                <>
+                  <span className="block whitespace-nowrap text-[clamp(0.72rem,3.35vw,0.95rem)] tracking-[-0.025em] sm:hidden">Viện Công nghệ số</span>
+                  <span className="block whitespace-nowrap text-[clamp(0.72rem,3.35vw,0.95rem)] tracking-[-0.025em] sm:hidden">và Chuyển đổi số quốc gia</span>
+                  <span className="hidden sm:inline">{name}</span>
+                </>
+              ) : (
+                <span className="text-[clamp(0.72rem,3.1vw,1rem)] sm:text-[1.2rem] md:text-[1.55rem]">{nameEn}</span>
+              )}
             </div>
             <div className="mt-0.5 hidden truncate text-[0.72rem] uppercase tracking-[0.06em] text-muted-foreground sm:block md:text-[0.78rem]">
               {lang === 'en' ? name : nameEn}
@@ -209,6 +216,26 @@ function MobileNav({ tree }: { tree: MenuNode[] }) {
     close();
     navigate('/');
   };
+  const adminRows = (nested = false) => (
+    <>
+      <Link
+        href="/quan-tri"
+        onClick={close}
+        className={nested ? 'block py-1.5 pl-8 pr-4 text-sm font-semibold text-ink hover:text-navy' : 'block border-t border-rule px-4 py-3 text-sm font-semibold text-ink hover:bg-muted'}
+        data-testid="link-mobile-admin-inline"
+      >
+        {adminSession ? t('Quản trị / CRM', 'Admin / CRM') : t('Đăng nhập / Quản trị CRM', 'Sign in / Admin CRM')}
+      </Link>
+      {adminSession && (
+        <button
+          onClick={logoutAdmin}
+          className={nested ? 'block w-full py-1.5 pl-8 pr-4 text-left text-sm text-muted-foreground hover:text-seal' : 'block w-full border-t border-rule px-4 py-2.5 text-left text-sm text-muted-foreground hover:bg-muted hover:text-seal'}
+        >
+          {t('Đăng xuất quản trị', 'Sign out of admin')}
+        </button>
+      )}
+    </>
+  );
   return (
     <Sheet open={open} onOpenChange={(next) => {
       setOpen(next);
@@ -232,10 +259,14 @@ function MobileNav({ tree }: { tree: MenuNode[] }) {
                   {n.children.length > 0 && (
                     <ul className="pb-2">
                       {n.children.map((c) => (
-                        <li key={c.id}><SmartLink href={c.url} newTab={c.openInNewTab} onClick={close} className="block py-1.5 pl-8 pr-4 text-sm text-muted-foreground hover:text-navy">{label(c)}</SmartLink></li>
+                        <li key={c.id}>
+                          <SmartLink href={c.url} newTab={c.openInNewTab} onClick={close} className="block py-1.5 pl-8 pr-4 text-sm text-muted-foreground hover:text-navy">{label(c)}</SmartLink>
+                          {c.url === '/lien-he' && adminRows(true)}
+                        </li>
                       ))}
                     </ul>
                   )}
+                  {n.url === '/lien-he' && adminRows(false)}
                 </li>
               ))}
             </ul>
@@ -244,16 +275,6 @@ function MobileNav({ tree }: { tree: MenuNode[] }) {
             {(['vi', 'en'] as const).map((l) => (
               <button key={l} onClick={() => setLang(l)} className={cn('border px-3 py-1 text-xs font-semibold', lang === l ? 'border-navy bg-navy text-white' : 'border-rule')}>{l === 'vi' ? 'Tiếng Việt' : 'English'}</button>
             ))}
-          </div>
-          <div className="border-t border-rule p-4">
-            {adminSession ? (
-              <div className="space-y-2">
-                <Link href="/quan-tri" onClick={close} className="flex items-center justify-center gap-2 bg-navy px-3 py-2.5 text-sm font-semibold text-white"><Users className="h-4 w-4" />{t('Mở Quản trị / CRM', 'Open Admin / CRM')}</Link>
-                <button onClick={logoutAdmin} className="flex w-full items-center justify-center gap-2 border border-rule px-3 py-2.5 text-sm font-semibold text-muted-foreground hover:border-seal hover:text-seal"><X className="h-4 w-4" />{t('Đăng xuất quản trị', 'Sign out of admin')}</button>
-              </div>
-            ) : (
-              <Link href="/quan-tri" onClick={close} className="flex items-center justify-center gap-2 bg-navy px-3 py-2.5 text-sm font-semibold text-white"><Users className="h-4 w-4" />{t('Đăng nhập / Quản trị CRM', 'Sign in / Admin CRM')}</Link>
-            )}
           </div>
         </div>
       </SheetContent>
