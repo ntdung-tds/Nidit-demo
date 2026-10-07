@@ -115,25 +115,24 @@ function Masthead() {
   const { lang, t } = usePortal();
   const name = s?.siteName ?? 'Viện Công nghệ số và Chuyển đổi số quốc gia';
   const nameEn = s?.siteNameEn ?? 'National Institute of Digital Technology and Digital Transformation';
-  const title = lang === 'en' ? nameEn : name;
   return (
-    <div className="border-b border-rule bg-paper" data-testid="site-masthead">
+    <div className="paper-grain border-b border-rule bg-paper" data-testid="site-masthead">
       <div className="container-portal flex items-center justify-between gap-6 py-4 md:py-5">
-        <Link href="/" className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4 md:gap-5" data-testid="link-home-logo">
-          <img src={asset('logo-nidit.svg')} alt={t('Logo NIDIT (tạm thời)', 'NIDIT logo (temporary)')} className="h-14 w-14 shrink-0 sm:h-16 sm:w-16 md:h-20 md:w-20" />
+        <Link href="/" className="flex min-w-0 items-center gap-3 md:gap-4" data-testid="link-home-logo">
+          <img src={asset('logo-nidit.svg')} alt={t('Logo NIDIT (tạm thời)', 'NIDIT logo (temporary)')} className="h-12 w-12 shrink-0 md:h-[4.25rem] md:w-[4.25rem]" />
           <div className="min-w-0">
-            <div className="mb-1 text-[0.6rem] font-semibold uppercase leading-relaxed tracking-[0.09em] text-seal sm:text-[0.7rem] md:mb-1.5 md:text-[0.75rem]">
+            <div className="text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-seal md:text-[0.7rem]">
               {lang === 'en' ? (s?.parentOrgEn ?? 'Ministry of Science and Technology') : (s?.parentOrg ?? 'Bộ Khoa học và Công nghệ')}
             </div>
-            <div className="font-display text-[0.95rem] font-bold uppercase leading-[1.18] text-navy sm:text-[1.15rem] md:text-[1.28rem] lg:whitespace-nowrap lg:text-[1.38rem] xl:text-[1.48rem] 2xl:text-[1.58rem]" data-testid="text-site-name">
-              {title}
+            <div className="font-display text-[1rem] font-bold uppercase leading-tight text-navy sm:text-[1.2rem] md:text-[1.55rem] lg:whitespace-nowrap" data-testid="text-site-name">
+              {lang === 'en' ? nameEn : name}
             </div>
-            <div className="mt-1.5 hidden text-[0.65rem] uppercase leading-relaxed tracking-[0.025em] text-muted-foreground sm:block md:text-[0.69rem] lg:whitespace-nowrap">
+            <div className="mt-0.5 hidden truncate text-[0.72rem] uppercase tracking-[0.06em] text-muted-foreground sm:block md:text-[0.78rem]">
               {lang === 'en' ? name : nameEn}
             </div>
           </div>
         </Link>
-        <SearchBox className="hidden w-[280px] shrink-0 xl:flex" />
+        <SearchBox className="hidden w-[320px] shrink-0 lg:flex" />
       </div>
     </div>
   );
