@@ -1,0 +1,3231 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API cho Trang thông tin điện tử Viện Công nghệ số và Chuyển đổi số quốc gia (NIDIT) - bản trình diễn
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Đăng nhập tài khoản demo
+  - name: site
+    description: Cấu hình trang, menu, thống kê truy cập
+  - name: content
+    description: Tin bài, chuyên mục, trang tĩnh
+  - name: sections
+    description: Các chuyên trang (lĩnh vực, đề tài, công bố, dữ liệu, đánh giá, văn bản, thư viện)
+  - name: admin
+    description: Quản trị nội dung (CMS)
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # ---------------------------------------------------------------- auth
+  /auth/demo-accounts:
+    get:
+      operationId: listDemoAccounts
+      tags: [auth]
+      summary: Danh sách tài khoản demo (quản trị / biên tập / duyệt)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/User" }
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Đăng nhập bằng tài khoản demo, trả về token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthSession" }
+        "400":
+          description: Invalid
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Người dùng hiện tại (theo token)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "401":
+          description: Chưa đăng nhập
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      responses:
+        "204":
+          description: Đã đăng xuất
+
+  # ---------------------------------------------------------------- site
+  /site-settings:
+    get:
+      operationId: getSiteSettings
+      tags: [site]
+      summary: Thông tin định danh trang (header/footer, SEO mặc định)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SiteSettings" }
+  /admin/site-settings:
+    patch:
+      operationId: updateSiteSettings
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SiteSettingsUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SiteSettings" }
+  /visit-counter:
+    get:
+      operationId: getVisitCounter
+      tags: [site]
+      summary: Bộ đếm truy cập (đang online, hôm nay, tháng này, tổng)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/VisitCounter" }
+  /track:
+    post:
+      operationId: trackVisit
+      tags: [site]
+      summary: Ghi nhận một lượt xem trang
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/VisitInput" }
+      responses:
+        "204":
+          description: Recorded
+  /menu-items:
+    get:
+      operationId: listMenuItems
+      tags: [site]
+      parameters:
+        - name: location
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/MenuLocation" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/MenuItem" }
+  /admin/menu-items:
+    post:
+      operationId: createMenuItem
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MenuItemInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MenuItem" }
+  /admin/menu-items/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    patch:
+      operationId: updateMenuItem
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MenuItemUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MenuItem" }
+    delete:
+      operationId: deleteMenuItem
+      tags: [admin]
+      responses:
+        "204":
+          description: Deleted
+
+  # ---------------------------------------------------------------- categories
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [content]
+      summary: Toàn bộ chuyên mục (cây nhiều cấp qua parentId)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Category" }
+  /admin/categories:
+    post:
+      operationId: createCategory
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CategoryInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Category" }
+  /admin/categories/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    patch:
+      operationId: updateCategory
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CategoryUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Category" }
+    delete:
+      operationId: deleteCategory
+      tags: [admin]
+      responses:
+        "204":
+          description: Deleted
+        "400":
+          description: Còn bài viết hoặc chuyên mục con
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  # ---------------------------------------------------------------- static pages
+  /pages/{slug}:
+    parameters:
+      - $ref: "#/components/parameters/SlugPath"
+    get:
+      operationId: getStaticPage
+      tags: [content]
+      summary: Trang tĩnh đã xuất bản theo slug
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StaticPage" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+  /admin/pages:
+    get:
+      operationId: listAdminPages
+      tags: [admin]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/StaticPage" }
+    post:
+      operationId: createStaticPage
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StaticPageInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StaticPage" }
+  /admin/pages/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      operationId: getAdminPage
+      tags: [admin]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StaticPage" }
+    patch:
+      operationId: updateStaticPage
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StaticPageUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StaticPage" }
+    delete:
+      operationId: deleteStaticPage
+      tags: [admin]
+      responses:
+        "204":
+          description: Deleted
+
+  # ---------------------------------------------------------------- home + articles (public)
+  /home:
+    get:
+      operationId: getHomeFeed
+      tags: [content]
+      summary: Dữ liệu tổng hợp cho trang chủ
+      parameters:
+        - $ref: "#/components/parameters/LangQuery"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HomeFeed" }
+  /articles:
+    get:
+      operationId: listArticles
+      tags: [content]
+      summary: Tin bài đã xuất bản (phân trang, lọc theo chuyên mục / thẻ / từ khóa)
+      parameters:
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/PageSizeQuery"
+        - $ref: "#/components/parameters/LangQuery"
+        - name: category
+          in: query
+          required: false
+          description: Slug chuyên mục (bao gồm chuyên mục con)
+          schema: { type: string }
+        - name: tag
+          in: query
+          required: false
+          schema: { type: string }
+        - name: q
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ArticlePage" }
+  /articles/popular:
+    get:
+      operationId: listPopularArticles
+      tags: [content]
+      summary: Tin đọc nhiều
+      parameters:
+        - $ref: "#/components/parameters/LangQuery"
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 20 }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ArticleSummary" }
+  /articles/{slug}:
+    parameters:
+      - $ref: "#/components/parameters/SlugPath"
+    get:
+      operationId: getArticle
+      tags: [content]
+      summary: Chi tiết tin bài đã xuất bản kèm tin liên quan
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ArticleDetail" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  # ---------------------------------------------------------------- admin articles + workflow
+  /admin/articles:
+    get:
+      operationId: listAdminArticles
+      tags: [admin]
+      parameters:
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/PageSizeQuery"
+        - name: status
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/ArticleStatus" }
+        - name: categoryId
+          in: query
+          required: false
+          schema: { type: integer }
+        - name: createdById
+          in: query
+          required: false
+          schema: { type: integer }
+        - name: origin
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/ArticleOrigin" }
+        - name: q
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminArticlePage" }
+    post:
+      operationId: createArticle
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ArticleInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminArticle" }
+  /admin/articles/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      operationId: getAdminArticle
+      tags: [admin]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminArticle" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+    patch:
+      operationId: updateArticle
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ArticleUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminArticle" }
+        "403":
+          description: Không có quyền
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+    delete:
+      operationId: deleteArticle
+      tags: [admin]
+      responses:
+        "204":
+          description: Deleted
+  /admin/articles/{id}/transition:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    post:
+      operationId: transitionArticle
+      tags: [admin]
+      summary: Chuyển trạng thái quy trình (gửi duyệt, yêu cầu sửa, phê duyệt, xuất bản/hẹn giờ, gỡ, về nháp)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ArticleTransitionInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminArticle" }
+        "400":
+          description: Chuyển trạng thái không hợp lệ
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "403":
+          description: Không có quyền
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  # ---------------------------------------------------------------- activity fields
+  /fields:
+    get:
+      operationId: listFields
+      tags: [sections]
+      summary: Lĩnh vực hoạt động
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ActivityField" }
+  /fields/{slug}:
+    parameters:
+      - $ref: "#/components/parameters/SlugPath"
+    get:
+      operationId: getField
+      tags: [sections]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FieldDetail" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  # ---------------------------------------------------------------- projects
+  /projects:
+    get:
+      operationId: listProjects
+      tags: [sections]
+      summary: Nghiên cứu - Đề tài - Dự án
+      parameters:
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/PageSizeQuery"
+        - name: status
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/ProjectStatus" }
+        - name: fieldId
+          in: query
+          required: false
+          schema: { type: integer }
+        - name: q
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProjectPage" }
+  /projects/{slug}:
+    parameters:
+      - $ref: "#/components/parameters/SlugPath"
+    get:
+      operationId: getProject
+      tags: [sections]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProjectDetail" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+  /admin/projects:
+    post:
+      operationId: createProject
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProjectInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Project" }
+  /admin/projects/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    patch:
+      operationId: updateProject
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProjectUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Project" }
+    delete:
+      operationId: deleteProject
+      tags: [admin]
+      responses:
+        "204":
+          description: Deleted
+
+  # ---------------------------------------------------------------- publications
+  /publications:
+    get:
+      operationId: listPublications
+      tags: [sections]
+      summary: Công bố khoa học
+      parameters:
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/PageSizeQuery"
+        - name: type
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/PublicationType" }
+        - name: year
+          in: query
+          required: false
+          schema: { type: integer }
+        - name: fieldId
+          in: query
+          required: false
+          schema: { type: integer }
+        - name: q
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PublicationPage" }
+  /admin/publications:
+    post:
+      operationId: createPublication
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PublicationInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Publication" }
+  /admin/publications/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    patch:
+      operationId: updatePublication
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PublicationUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Publication" }
+    delete:
+      operationId: deletePublication
+      tags: [admin]
+      responses:
+        "204":
+          description: Deleted
+
+  # ---------------------------------------------------------------- datasets (AI data)
+  /datasets:
+    get:
+      operationId: listDatasets
+      tags: [sections]
+      summary: Dữ liệu phục vụ AI
+      parameters:
+        - name: fieldId
+          in: query
+          required: false
+          schema: { type: integer }
+        - name: accessLevel
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/AccessLevel" }
+        - name: q
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Dataset" }
+  /datasets/stats:
+    get:
+      operationId: getDatasetStats
+      tags: [sections]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DatasetStats" }
+  /datasets/{slug}:
+    parameters:
+      - $ref: "#/components/parameters/SlugPath"
+    get:
+      operationId: getDataset
+      tags: [sections]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DatasetDetail" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+  /datasets/{id}/access:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    post:
+      operationId: recordDatasetAccess
+      tags: [sections]
+      summary: Ghi nhận lượt truy cập dữ liệu mở và trả về đường dẫn
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DatasetAccessInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DatasetAccessResult" }
+        "403":
+          description: Dữ liệu yêu cầu đăng ký
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+  /admin/datasets:
+    post:
+      operationId: createDataset
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DatasetInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Dataset" }
+  /admin/datasets/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    patch:
+      operationId: updateDataset
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DatasetUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Dataset" }
+    delete:
+      operationId: deleteDataset
+      tags: [admin]
+      responses:
+        "204":
+          description: Deleted
+
+  # ---------------------------------------------------------------- evaluation services
+  /evaluation-services:
+    get:
+      operationId: listEvaluationServices
+      tags: [sections]
+      summary: Dịch vụ đánh giá - thử nghiệm - kiểm định
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/EvaluationService" }
+  /evaluation-services/{slug}:
+    parameters:
+      - $ref: "#/components/parameters/SlugPath"
+    get:
+      operationId: getEvaluationService
+      tags: [sections]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EvaluationService" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  # ---------------------------------------------------------------- documents
+  /documents:
+    get:
+      operationId: listDocuments
+      tags: [sections]
+      summary: Văn bản - Tài liệu (lọc + phân trang + bộ đếm theo nhóm)
+      parameters:
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/PageSizeQuery"
+        - name: q
+          in: query
+          required: false
+          schema: { type: string }
+        - name: docGroup
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/DocumentGroup" }
+        - name: docType
+          in: query
+          required: false
+          schema: { type: string }
+        - name: issuer
+          in: query
+          required: false
+          schema: { type: string }
+        - name: year
+          in: query
+          required: false
+          schema: { type: integer }
+        - name: fieldId
+          in: query
+          required: false
+          schema: { type: integer }
+        - name: sort
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/DocumentSort" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DocumentPage" }
+  /documents/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    get:
+      operationId: getDocument
+      tags: [sections]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DocumentDetail" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+  /documents/{id}/download:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    post:
+      operationId: recordDocumentDownload
+      tags: [sections]
+      summary: Tăng lượt tải và trả về đường dẫn tệp
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DownloadResult" }
+  /admin/documents:
+    post:
+      operationId: createDocument
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DocumentInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DocumentItem" }
+  /admin/documents/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    patch:
+      operationId: updateDocument
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DocumentUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DocumentItem" }
+    delete:
+      operationId: deleteDocument
+      tags: [admin]
+      responses:
+        "204":
+          description: Deleted
+
+  # ---------------------------------------------------------------- library
+  /albums:
+    get:
+      operationId: listAlbums
+      tags: [sections]
+      summary: Thư viện ảnh / video
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/AlbumType" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Album" }
+  /albums/{slug}:
+    parameters:
+      - $ref: "#/components/parameters/SlugPath"
+    get:
+      operationId: getAlbum
+      tags: [sections]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Album" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+  /admin/albums:
+    post:
+      operationId: createAlbum
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AlbumInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Album" }
+  /admin/albums/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    patch:
+      operationId: updateAlbum
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AlbumUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Album" }
+    delete:
+      operationId: deleteAlbum
+      tags: [admin]
+      responses:
+        "204":
+          description: Deleted
+
+  # ---------------------------------------------------------------- about
+  /leaders:
+    get:
+      operationId: listLeaders
+      tags: [sections]
+      summary: Lãnh đạo Viện
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Leader" }
+  /org-units:
+    get:
+      operationId: listOrgUnits
+      tags: [sections]
+      summary: Cơ cấu tổ chức
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/OrgUnit" }
+
+  # ---------------------------------------------------------------- search
+  /search:
+    get:
+      operationId: searchSite
+      tags: [site]
+      summary: Tìm kiếm toàn trang, nhóm theo loại nội dung
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string, minLength: 1 }
+        - name: type
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/SearchType" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SearchResults" }
+
+  # ---------------------------------------------------------------- inquiries
+  /inquiries:
+    post:
+      operationId: createInquiry
+      tags: [site]
+      summary: Gửi liên hệ / yêu cầu truy cập dữ liệu / yêu cầu đánh giá
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InquiryInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InquiryReceipt" }
+        "400":
+          description: Invalid
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+  /admin/inquiries:
+    get:
+      operationId: listInquiries
+      tags: [admin]
+      parameters:
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/PageSizeQuery"
+        - name: type
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/InquiryType" }
+        - name: status
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/InquiryStatus" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InquiryPage" }
+  /admin/inquiries/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    patch:
+      operationId: updateInquiry
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InquiryUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Inquiry" }
+
+  # ---------------------------------------------------------------- crawler (auto news)
+  /admin/crawl-sources:
+    get:
+      operationId: listCrawlSources
+      tags: [admin]
+      summary: Nguồn tin tự động (tối đa 5 nguồn RSS)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/CrawlSource" }
+    post:
+      operationId: createCrawlSource
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CrawlSourceInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CrawlSource" }
+        "400":
+          description: Vượt quá 5 nguồn hoặc URL không hợp lệ
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+  /admin/crawl-sources/run-all:
+    post:
+      operationId: runAllCrawlSources
+      tags: [admin]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/CrawlRunResult" }
+  /admin/crawl-sources/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    patch:
+      operationId: updateCrawlSource
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CrawlSourceUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CrawlSource" }
+    delete:
+      operationId: deleteCrawlSource
+      tags: [admin]
+      responses:
+        "204":
+          description: Deleted
+  /admin/crawl-sources/{id}/run:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    post:
+      operationId: runCrawlSource
+      tags: [admin]
+      summary: Chạy thu thập ngay cho một nguồn
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CrawlRunResult" }
+  /admin/crawl-items:
+    get:
+      operationId: listCrawlItems
+      tags: [admin]
+      summary: Hàng chờ tin tự động
+      parameters:
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/PageSizeQuery"
+        - name: status
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/CrawlItemStatus" }
+        - name: sourceId
+          in: query
+          required: false
+          schema: { type: integer }
+        - name: q
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CrawlItemPage" }
+  /admin/crawl-items/{id}/import:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    post:
+      operationId: importCrawlItem
+      tags: [admin]
+      summary: Chuyển tin trong hàng chờ thành bài nháp (không tự xuất bản)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CrawlImportInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminArticle" }
+  /admin/crawl-items/{id}/reject:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    post:
+      operationId: rejectCrawlItem
+      tags: [admin]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CrawlItem" }
+
+  # ---------------------------------------------------------------- AI assistant
+  /admin/ai/suggest:
+    post:
+      operationId: suggestWithAi
+      tags: [admin]
+      summary: Gợi ý AI cho biên tập (tiêu đề, tóm tắt, từ khóa, viết lại, SEO, soát lỗi)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AiSuggestInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AiSuggestion" }
+        "502":
+          description: Lỗi dịch vụ AI
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  # ---------------------------------------------------------------- stats, logs, dashboard
+  /admin/dashboard:
+    get:
+      operationId: getDashboard
+      tags: [admin]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DashboardSummary" }
+  /admin/stats/visits:
+    get:
+      operationId: getVisitStats
+      tags: [admin]
+      parameters:
+        - name: days
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 365 }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/VisitStats" }
+  /admin/activity-logs:
+    get:
+      operationId: listActivityLogs
+      tags: [admin]
+      parameters:
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/PageSizeQuery"
+        - name: actorId
+          in: query
+          required: false
+          schema: { type: integer }
+        - name: entityType
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ActivityLogPage" }
+
+  # ---------------------------------------------------------------- users
+  /admin/users:
+    get:
+      operationId: listUsers
+      tags: [admin]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/User" }
+    post:
+      operationId: createUser
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UserInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+  /admin/users/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    patch:
+      operationId: updateUser
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UserUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+
+  # ---------------------------------------------------------------- backups
+  /admin/backups:
+    get:
+      operationId: listBackups
+      tags: [admin]
+      summary: Danh sách bản sao lưu (tải về tại /api/admin/backups/{id}/download?token=...)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Backup" }
+    post:
+      operationId: createBackup
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BackupInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Backup" }
+
+  # ---------------------------------------------------------------- media library
+  /admin/media:
+    get:
+      operationId: listMedia
+      tags: [admin]
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/MediaType" }
+        - name: q
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/MediaItem" }
+    post:
+      operationId: createMedia
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MediaInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MediaItem" }
+  /admin/media/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdPath"
+    delete:
+      operationId: deleteMedia
+      tags: [admin]
+      responses:
+        "204":
+          description: Deleted
+
+components:
+  parameters:
+    IdPath:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer }
+    SlugPath:
+      name: slug
+      in: path
+      required: true
+      schema: { type: string }
+    PageQuery:
+      name: page
+      in: query
+      required: false
+      schema: { type: integer, minimum: 1 }
+    PageSizeQuery:
+      name: pageSize
+      in: query
+      required: false
+      schema: { type: integer, minimum: 1, maximum: 100 }
+    LangQuery:
+      name: lang
+      in: query
+      required: false
+      schema: { $ref: "#/components/schemas/ContentLanguage" }
+
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
+
+    # ------------------------------------------------------------ enums
+    UserRole:
+      type: string
+      enum: [admin, editor, reviewer]
+    ContentLanguage:
+      type: string
+      enum: [vi, en]
+    MenuLocation:
+      type: string
+      enum: [main, footer, links]
+    PageStatus:
+      type: string
+      enum: [draft, published]
+    ArticleStatus:
+      type: string
+      enum: [draft, pending, changes_requested, approved, scheduled, published, unpublished]
+    ArticleOrigin:
+      type: string
+      enum: [manual, crawler]
+    TransitionAction:
+      type: string
+      enum: [submit, request_changes, approve, publish, unpublish, revert_to_draft]
+    ProjectStatus:
+      type: string
+      enum: [proposed, ongoing, completed]
+    PublicationType:
+      type: string
+      enum: [journal, conference, book, report, patent]
+    AccessLevel:
+      type: string
+      enum: [open, registered, restricted]
+    AccessMethodType:
+      type: string
+      enum: [link, api, object_storage]
+    DocumentGroup:
+      type: string
+      enum: [legal, direction, guidance, report, standard, form]
+    DocumentSort:
+      type: string
+      enum: [newest, oldest, downloads]
+    AlbumType:
+      type: string
+      enum: [photo, video]
+    OrgUnitType:
+      type: string
+      enum: [council, office, department, center]
+    SearchType:
+      type: string
+      enum: [article, document, project, publication, dataset, service, page]
+    InquiryType:
+      type: string
+      enum: [contact, dataset_access, evaluation_request]
+    InquiryStatus:
+      type: string
+      enum: [new, processing, resolved, rejected]
+    CrawlItemStatus:
+      type: string
+      enum: [pending, imported, rejected]
+    AiTask:
+      type: string
+      enum: [titles, summary, keywords, rewrite, seo, proofread]
+    MediaType:
+      type: string
+      enum: [image, video, file]
+
+    # ------------------------------------------------------------ shared small types
+    StatusCount:
+      type: object
+      required: [status, count]
+      properties:
+        status: { type: string }
+        count: { type: integer }
+    LabelCount:
+      type: object
+      required: [label, count]
+      properties:
+        label: { type: string }
+        count: { type: integer }
+    FacetCount:
+      type: object
+      required: [value, label, count]
+      properties:
+        value: { type: string }
+        label: { type: string }
+        count: { type: integer }
+
+    # ------------------------------------------------------------ users / auth
+    User:
+      type: object
+      required: [id, fullName, email, role, title, unit, isActive, lastLoginAt, createdAt]
+      properties:
+        id: { type: integer }
+        fullName: { type: string }
+        email: { type: string }
+        role: { $ref: "#/components/schemas/UserRole" }
+        title: { type: string, description: Chức danh }
+        unit: { type: string, description: Đơn vị công tác }
+        isActive: { type: boolean }
+        lastLoginAt: { type: ["string", "null"], format: date-time }
+        createdAt: { type: string, format: date-time }
+    UserInput:
+      type: object
+      required: [fullName, email, role]
+      properties:
+        fullName: { type: string, minLength: 1 }
+        email: { type: string, minLength: 3 }
+        role: { $ref: "#/components/schemas/UserRole" }
+        title: { type: string }
+        unit: { type: string }
+    UserUpdate:
+      type: object
+      properties:
+        fullName: { type: string, minLength: 1 }
+        email: { type: string, minLength: 3 }
+        role: { $ref: "#/components/schemas/UserRole" }
+        title: { type: string }
+        unit: { type: string }
+        isActive: { type: boolean }
+    LoginInput:
+      type: object
+      required: [userId]
+      properties:
+        userId: { type: integer }
+    AuthSession:
+      type: object
+      required: [token, user]
+      properties:
+        token: { type: string }
+        user: { $ref: "#/components/schemas/User" }
+
+    # ------------------------------------------------------------ site
+    SiteSettings:
+      type: object
+      required:
+        [siteName, siteNameEn, shortName, parentOrg, parentOrgEn, parentPortalUrl, address, addressEn, phone, email,
+         responsiblePerson, responsibleTitle, copyrightNote, workingHours, mapEmbedUrl, facebookUrl, youtubeUrl,
+         seoTitle, seoDescription, seoKeywords, demoNotice, updatedAt]
+      properties:
+        siteName: { type: string }
+        siteNameEn: { type: string }
+        shortName: { type: string }
+        parentOrg: { type: string, description: Cơ quan chủ quản }
+        parentOrgEn: { type: string }
+        parentPortalUrl: { type: string }
+        address: { type: string }
+        addressEn: { type: string }
+        phone: { type: string }
+        email: { type: string }
+        responsiblePerson: { type: string, description: Người chịu trách nhiệm nội dung }
+        responsibleTitle: { type: string }
+        copyrightNote: { type: string }
+        workingHours: { type: string }
+        mapEmbedUrl: { type: ["string", "null"] }
+        facebookUrl: { type: ["string", "null"] }
+        youtubeUrl: { type: ["string", "null"] }
+        seoTitle: { type: string }
+        seoDescription: { type: string }
+        seoKeywords:
+          type: array
+          items: { type: string }
+        demoNotice: { type: ["string", "null"], description: Dòng thông báo dữ liệu minh họa; null để ẩn }
+        updatedAt: { type: string, format: date-time }
+    SiteSettingsUpdate:
+      type: object
+      properties:
+        siteName: { type: string, minLength: 1 }
+        siteNameEn: { type: string }
+        shortName: { type: string }
+        parentOrg: { type: string }
+        parentOrgEn: { type: string }
+        parentPortalUrl: { type: string }
+        address: { type: string }
+        addressEn: { type: string }
+        phone: { type: string }
+        email: { type: string }
+        responsiblePerson: { type: string }
+        responsibleTitle: { type: string }
+        copyrightNote: { type: string }
+        workingHours: { type: string }
+        mapEmbedUrl: { type: ["string", "null"] }
+        facebookUrl: { type: ["string", "null"] }
+        youtubeUrl: { type: ["string", "null"] }
+        seoTitle: { type: string }
+        seoDescription: { type: string }
+        seoKeywords:
+          type: array
+          items: { type: string }
+        demoNotice: { type: ["string", "null"] }
+    VisitInput:
+      type: object
+      required: [path]
+      properties:
+        path: { type: string, minLength: 1 }
+        articleId: { type: ["integer", "null"] }
+        referrer: { type: ["string", "null"] }
+    VisitCounter:
+      type: object
+      required: [online, today, thisMonth, total]
+      properties:
+        online: { type: integer }
+        today: { type: integer }
+        thisMonth: { type: integer }
+        total: { type: integer }
+
+    # ------------------------------------------------------------ menu + categories
+    MenuItem:
+      type: object
+      required: [id, label, labelEn, url, parentId, location, sortOrder, isVisible, openInNewTab]
+      properties:
+        id: { type: integer }
+        label: { type: string }
+        labelEn: { type: ["string", "null"] }
+        url: { type: string }
+        parentId: { type: ["integer", "null"] }
+        location: { $ref: "#/components/schemas/MenuLocation" }
+        sortOrder: { type: integer }
+        isVisible: { type: boolean }
+        openInNewTab: { type: boolean }
+    MenuItemInput:
+      type: object
+      required: [label, url, location]
+      properties:
+        label: { type: string, minLength: 1 }
+        labelEn: { type: ["string", "null"] }
+        url: { type: string, minLength: 1 }
+        parentId: { type: ["integer", "null"] }
+        location: { $ref: "#/components/schemas/MenuLocation" }
+        sortOrder: { type: integer }
+        isVisible: { type: boolean }
+        openInNewTab: { type: boolean }
+    MenuItemUpdate:
+      type: object
+      properties:
+        label: { type: string, minLength: 1 }
+        labelEn: { type: ["string", "null"] }
+        url: { type: string, minLength: 1 }
+        parentId: { type: ["integer", "null"] }
+        location: { $ref: "#/components/schemas/MenuLocation" }
+        sortOrder: { type: integer }
+        isVisible: { type: boolean }
+        openInNewTab: { type: boolean }
+    Category:
+      type: object
+      required: [id, name, nameEn, slug, parentId, description, sortOrder, isVisible, articleCount]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        nameEn: { type: ["string", "null"] }
+        slug: { type: string }
+        parentId: { type: ["integer", "null"] }
+        description: { type: ["string", "null"] }
+        sortOrder: { type: integer }
+        isVisible: { type: boolean }
+        articleCount: { type: integer, description: Số bài đã xuất bản }
+    CategoryInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1 }
+        nameEn: { type: ["string", "null"] }
+        slug: { type: string, description: Bỏ trống để tự sinh từ tên }
+        parentId: { type: ["integer", "null"] }
+        description: { type: ["string", "null"] }
+        sortOrder: { type: integer }
+        isVisible: { type: boolean }
+    CategoryUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        nameEn: { type: ["string", "null"] }
+        slug: { type: string }
+        parentId: { type: ["integer", "null"] }
+        description: { type: ["string", "null"] }
+        sortOrder: { type: integer }
+        isVisible: { type: boolean }
+
+    # ------------------------------------------------------------ static pages
+    StaticPage:
+      type: object
+      required: [id, slug, title, titleEn, summary, content, contentEn, status, seoTitle, seoDescription, updatedAt, updatedByName]
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        title: { type: string }
+        titleEn: { type: ["string", "null"] }
+        summary: { type: ["string", "null"] }
+        content: { type: string, description: HTML }
+        contentEn: { type: ["string", "null"], description: HTML }
+        status: { $ref: "#/components/schemas/PageStatus" }
+        seoTitle: { type: ["string", "null"] }
+        seoDescription: { type: ["string", "null"] }
+        updatedAt: { type: string, format: date-time }
+        updatedByName: { type: ["string", "null"] }
+    StaticPageInput:
+      type: object
+      required: [title, content]
+      properties:
+        title: { type: string, minLength: 1 }
+        slug: { type: string }
+        titleEn: { type: ["string", "null"] }
+        summary: { type: ["string", "null"] }
+        content: { type: string }
+        contentEn: { type: ["string", "null"] }
+        status: { $ref: "#/components/schemas/PageStatus" }
+        seoTitle: { type: ["string", "null"] }
+        seoDescription: { type: ["string", "null"] }
+    StaticPageUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        slug: { type: string }
+        titleEn: { type: ["string", "null"] }
+        summary: { type: ["string", "null"] }
+        content: { type: string }
+        contentEn: { type: ["string", "null"] }
+        status: { $ref: "#/components/schemas/PageStatus" }
+        seoTitle: { type: ["string", "null"] }
+        seoDescription: { type: ["string", "null"] }
+
+    # ------------------------------------------------------------ articles (public)
+    ArticleSummary:
+      type: object
+      required:
+        [id, title, slug, summary, coverImage, categoryId, categoryName, categorySlug, publishedAt, viewCount, isFeatured,
+         tags, authorName, sourceName, language, eventStartAt, eventLocation, readingMinutes]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        slug: { type: string }
+        summary: { type: string }
+        coverImage: { type: ["string", "null"] }
+        categoryId: { type: ["integer", "null"] }
+        categoryName: { type: ["string", "null"] }
+        categorySlug: { type: ["string", "null"] }
+        publishedAt: { type: ["string", "null"], format: date-time }
+        viewCount: { type: integer }
+        isFeatured: { type: boolean }
+        tags:
+          type: array
+          items: { type: string }
+        authorName: { type: ["string", "null"] }
+        sourceName: { type: ["string", "null"], description: Nguồn tin (với tin tổng hợp) }
+        language: { $ref: "#/components/schemas/ContentLanguage" }
+        eventStartAt: { type: ["string", "null"], format: date-time, description: Thời gian diễn ra (tin sự kiện) }
+        eventLocation: { type: ["string", "null"] }
+        readingMinutes: { type: integer }
+    Article:
+      type: object
+      required:
+        [id, title, slug, summary, content, coverImage, coverCaption, categoryId, categoryName, categorySlug, publishedAt,
+         updatedAt, viewCount, isFeatured, tags, keywords, authorName, sourceName, sourceUrl, language, eventStartAt,
+         eventLocation, readingMinutes, seoTitle, seoDescription]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        slug: { type: string }
+        summary: { type: string }
+        content: { type: string, description: HTML đã được làm sạch }
+        coverImage: { type: ["string", "null"] }
+        coverCaption: { type: ["string", "null"] }
+        categoryId: { type: ["integer", "null"] }
+        categoryName: { type: ["string", "null"] }
+        categorySlug: { type: ["string", "null"] }
+        publishedAt: { type: ["string", "null"], format: date-time }
+        updatedAt: { type: string, format: date-time }
+        viewCount: { type: integer }
+        isFeatured: { type: boolean }
+        tags:
+          type: array
+          items: { type: string }
+        keywords:
+          type: array
+          items: { type: string }
+        authorName: { type: ["string", "null"] }
+        sourceName: { type: ["string", "null"] }
+        sourceUrl: { type: ["string", "null"] }
+        language: { $ref: "#/components/schemas/ContentLanguage" }
+        eventStartAt: { type: ["string", "null"], format: date-time }
+        eventLocation: { type: ["string", "null"] }
+        readingMinutes: { type: integer }
+        seoTitle: { type: ["string", "null"] }
+        seoDescription: { type: ["string", "null"] }
+    ArticleDetail:
+      type: object
+      required: [article, related]
+      properties:
+        article: { $ref: "#/components/schemas/Article" }
+        related:
+          type: array
+          items: { $ref: "#/components/schemas/ArticleSummary" }
+    ArticlePage:
+      type: object
+      required: [items, total, page, pageSize, totalPages]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/ArticleSummary" }
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+        totalPages: { type: integer }
+    HomeCategorySection:
+      type: object
+      required: [categoryId, categoryName, categorySlug, articles]
+      properties:
+        categoryId: { type: integer }
+        categoryName: { type: string }
+        categorySlug: { type: string }
+        articles:
+          type: array
+          items: { $ref: "#/components/schemas/ArticleSummary" }
+    HomeStats:
+      type: object
+      required: [projects, publications, datasets, documents, services, fields]
+      properties:
+        projects: { type: integer }
+        publications: { type: integer }
+        datasets: { type: integer }
+        documents: { type: integer }
+        services: { type: integer }
+        fields: { type: integer }
+    HomeFeed:
+      type: object
+      required: [featured, latest, mostRead, sections, upcomingEvents, stats, latestDocuments, featuredDatasets, featuredProjects, albums]
+      properties:
+        featured:
+          type: array
+          items: { $ref: "#/components/schemas/ArticleSummary" }
+        latest:
+          type: array
+          items: { $ref: "#/components/schemas/ArticleSummary" }
+        mostRead:
+          type: array
+          items: { $ref: "#/components/schemas/ArticleSummary" }
+        sections:
+          type: array
+          items: { $ref: "#/components/schemas/HomeCategorySection" }
+        upcomingEvents:
+          type: array
+          items: { $ref: "#/components/schemas/ArticleSummary" }
+        stats: { $ref: "#/components/schemas/HomeStats" }
+        latestDocuments:
+          type: array
+          items: { $ref: "#/components/schemas/DocumentItem" }
+        featuredDatasets:
+          type: array
+          items: { $ref: "#/components/schemas/Dataset" }
+        featuredProjects:
+          type: array
+          items: { $ref: "#/components/schemas/Project" }
+        albums:
+          type: array
+          items: { $ref: "#/components/schemas/Album" }
+
+    # ------------------------------------------------------------ articles (admin)
+    ArticleHistoryEntry:
+      type: object
+      required: [id, action, fromStatus, toStatus, actorId, actorName, actorRole, note, createdAt]
+      properties:
+        id: { type: integer }
+        action: { type: string, description: "create | update | submit | request_changes | approve | publish | schedule | unpublish | revert_to_draft | auto_publish | auto_unpublish | import" }
+        fromStatus: { type: ["string", "null"] }
+        toStatus: { type: string }
+        actorId: { type: ["integer", "null"] }
+        actorName: { type: string }
+        actorRole: { type: ["string", "null"] }
+        note: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+    AdminArticleSummary:
+      type: object
+      required:
+        [id, title, slug, status, categoryId, categoryName, language, coverImage, createdById, createdByName, createdAt,
+         updatedAt, publishedAt, unpublishAt, viewCount, isFeatured, origin, sourceName, reviewerNote]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        slug: { type: string }
+        status: { $ref: "#/components/schemas/ArticleStatus" }
+        categoryId: { type: ["integer", "null"] }
+        categoryName: { type: ["string", "null"] }
+        language: { $ref: "#/components/schemas/ContentLanguage" }
+        coverImage: { type: ["string", "null"] }
+        createdById: { type: ["integer", "null"] }
+        createdByName: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        publishedAt: { type: ["string", "null"], format: date-time, description: Thời điểm xuất bản (hoặc thời điểm hẹn giờ khi status=scheduled) }
+        unpublishAt: { type: ["string", "null"], format: date-time, description: Hẹn giờ gỡ bài }
+        viewCount: { type: integer }
+        isFeatured: { type: boolean }
+        origin: { $ref: "#/components/schemas/ArticleOrigin" }
+        sourceName: { type: ["string", "null"] }
+        reviewerNote: { type: ["string", "null"], description: Ghi chú gần nhất của người duyệt }
+    AdminArticle:
+      type: object
+      required:
+        [id, title, slug, summary, content, status, categoryId, categoryName, language, coverImage, coverCaption,
+         authorName, keywords, tags, sourceName, sourceUrl, isFeatured, eventStartAt, eventLocation, seoTitle,
+         seoDescription, createdById, createdByName, createdAt, updatedAt, publishedAt, unpublishAt, viewCount, origin,
+         reviewerNote, history, availableActions]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        slug: { type: string }
+        summary: { type: string }
+        content: { type: string, description: HTML }
+        status: { $ref: "#/components/schemas/ArticleStatus" }
+        categoryId: { type: ["integer", "null"] }
+        categoryName: { type: ["string", "null"] }
+        language: { $ref: "#/components/schemas/ContentLanguage" }
+        coverImage: { type: ["string", "null"] }
+        coverCaption: { type: ["string", "null"] }
+        authorName: { type: ["string", "null"] }
+        keywords:
+          type: array
+          items: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+        sourceName: { type: ["string", "null"] }
+        sourceUrl: { type: ["string", "null"] }
+        isFeatured: { type: boolean }
+        eventStartAt: { type: ["string", "null"], format: date-time }
+        eventLocation: { type: ["string", "null"] }
+        seoTitle: { type: ["string", "null"] }
+        seoDescription: { type: ["string", "null"] }
+        createdById: { type: ["integer", "null"] }
+        createdByName: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        publishedAt: { type: ["string", "null"], format: date-time }
+        unpublishAt: { type: ["string", "null"], format: date-time }
+        viewCount: { type: integer }
+        origin: { $ref: "#/components/schemas/ArticleOrigin" }
+        reviewerNote: { type: ["string", "null"] }
+        history:
+          type: array
+          items: { $ref: "#/components/schemas/ArticleHistoryEntry" }
+        availableActions:
+          type: array
+          description: Các thao tác quy trình người dùng hiện tại được phép thực hiện
+          items: { $ref: "#/components/schemas/TransitionAction" }
+    AdminArticlePage:
+      type: object
+      required: [items, total, page, pageSize, totalPages, statusCounts]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/AdminArticleSummary" }
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+        totalPages: { type: integer }
+        statusCounts:
+          type: array
+          items: { $ref: "#/components/schemas/StatusCount" }
+    ArticleInput:
+      type: object
+      required: [title]
+      properties:
+        title: { type: string, minLength: 1 }
+        slug: { type: string }
+        summary: { type: string }
+        content: { type: string }
+        categoryId: { type: ["integer", "null"] }
+        language: { $ref: "#/components/schemas/ContentLanguage" }
+        coverImage: { type: ["string", "null"] }
+        coverCaption: { type: ["string", "null"] }
+        authorName: { type: ["string", "null"] }
+        keywords:
+          type: array
+          items: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+        sourceName: { type: ["string", "null"] }
+        sourceUrl: { type: ["string", "null"] }
+        isFeatured: { type: boolean }
+        eventStartAt: { type: ["string", "null"], format: date-time }
+        eventLocation: { type: ["string", "null"] }
+        seoTitle: { type: ["string", "null"] }
+        seoDescription: { type: ["string", "null"] }
+        unpublishAt: { type: ["string", "null"], format: date-time }
+    ArticleUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        slug: { type: string }
+        summary: { type: string }
+        content: { type: string }
+        categoryId: { type: ["integer", "null"] }
+        language: { $ref: "#/components/schemas/ContentLanguage" }
+        coverImage: { type: ["string", "null"] }
+        coverCaption: { type: ["string", "null"] }
+        authorName: { type: ["string", "null"] }
+        keywords:
+          type: array
+          items: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+        sourceName: { type: ["string", "null"] }
+        sourceUrl: { type: ["string", "null"] }
+        isFeatured: { type: boolean }
+        eventStartAt: { type: ["string", "null"], format: date-time }
+        eventLocation: { type: ["string", "null"] }
+        seoTitle: { type: ["string", "null"] }
+        seoDescription: { type: ["string", "null"] }
+        unpublishAt: { type: ["string", "null"], format: date-time }
+    ArticleTransitionInput:
+      type: object
+      required: [action]
+      properties:
+        action: { $ref: "#/components/schemas/TransitionAction" }
+        note: { type: ["string", "null"], description: Bắt buộc khi yêu cầu chỉnh sửa }
+        publishAt: { type: ["string", "null"], format: date-time, description: Thời điểm xuất bản; ở tương lai thì thành hẹn giờ }
+        unpublishAt: { type: ["string", "null"], format: date-time, description: Hẹn giờ gỡ bài tự động }
+
+    # ------------------------------------------------------------ activity fields
+    ActivityField:
+      type: object
+      required:
+        [id, slug, name, nameEn, shortName, summary, summaryEn, description, highlights, icon, coverImage, sortOrder,
+         projectCount, publicationCount, datasetCount, serviceCount, documentCount]
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        name: { type: string }
+        nameEn: { type: ["string", "null"] }
+        shortName: { type: string }
+        summary: { type: string }
+        summaryEn: { type: ["string", "null"] }
+        description: { type: string, description: HTML }
+        highlights:
+          type: array
+          description: Nhiệm vụ / hướng nghiên cứu trọng tâm
+          items: { type: string }
+        icon: { type: string, description: "Mã biểu tượng gợi ý (cpu, database, shield-check, network, building-2, graduation-cap, ...)" }
+        coverImage: { type: ["string", "null"] }
+        sortOrder: { type: integer }
+        projectCount: { type: integer }
+        publicationCount: { type: integer }
+        datasetCount: { type: integer }
+        serviceCount: { type: integer }
+        documentCount: { type: integer }
+    FieldDetail:
+      type: object
+      required: [field, projects, publications, datasets, services, articles, documents]
+      properties:
+        field: { $ref: "#/components/schemas/ActivityField" }
+        projects:
+          type: array
+          items: { $ref: "#/components/schemas/Project" }
+        publications:
+          type: array
+          items: { $ref: "#/components/schemas/Publication" }
+        datasets:
+          type: array
+          items: { $ref: "#/components/schemas/Dataset" }
+        services:
+          type: array
+          items: { $ref: "#/components/schemas/EvaluationService" }
+        articles:
+          type: array
+          items: { $ref: "#/components/schemas/ArticleSummary" }
+        documents:
+          type: array
+          items: { $ref: "#/components/schemas/DocumentItem" }
+
+    # ------------------------------------------------------------ projects
+    ProjectMilestone:
+      type: object
+      required: [title, date, done]
+      properties:
+        title: { type: string }
+        date: { type: string, description: "YYYY-MM" }
+        done: { type: boolean }
+    Project:
+      type: object
+      required:
+        [id, slug, code, title, type, level, status, fieldId, fieldName, fieldSlug, leadName, leadUnit, startYear, endYear,
+         budget, summary, objectives, results, partners, milestones, keywords, coverImage, updatedAt]
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        code: { type: string, description: Mã số đề tài/dự án }
+        title: { type: string }
+        type: { type: string, description: "Đề tài / Dự án / Nhiệm vụ ..." }
+        level: { type: string, description: "Cấp quốc gia / Cấp Bộ / Cấp cơ sở" }
+        status: { $ref: "#/components/schemas/ProjectStatus" }
+        fieldId: { type: ["integer", "null"] }
+        fieldName: { type: ["string", "null"] }
+        fieldSlug: { type: ["string", "null"] }
+        leadName: { type: string, description: Chủ nhiệm }
+        leadUnit: { type: string, description: Đơn vị chủ trì }
+        startYear: { type: integer }
+        endYear: { type: ["integer", "null"] }
+        budget: { type: ["string", "null"] }
+        summary: { type: string }
+        objectives:
+          type: array
+          items: { type: string }
+        results: { type: ["string", "null"], description: HTML }
+        partners:
+          type: array
+          items: { type: string }
+        milestones:
+          type: array
+          items: { $ref: "#/components/schemas/ProjectMilestone" }
+        keywords:
+          type: array
+          items: { type: string }
+        coverImage: { type: ["string", "null"] }
+        updatedAt: { type: string, format: date-time }
+    ProjectPage:
+      type: object
+      required: [items, total, page, pageSize, totalPages, statusCounts]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/Project" }
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+        totalPages: { type: integer }
+        statusCounts:
+          type: array
+          items: { $ref: "#/components/schemas/StatusCount" }
+    ProjectDetail:
+      type: object
+      required: [project, publications, documents, related]
+      properties:
+        project: { $ref: "#/components/schemas/Project" }
+        publications:
+          type: array
+          items: { $ref: "#/components/schemas/Publication" }
+        documents:
+          type: array
+          items: { $ref: "#/components/schemas/DocumentItem" }
+        related:
+          type: array
+          items: { $ref: "#/components/schemas/Project" }
+    ProjectInput:
+      type: object
+      required: [title, code, type, level, status, startYear, leadName]
+      properties:
+        title: { type: string, minLength: 1 }
+        slug: { type: string }
+        code: { type: string, minLength: 1 }
+        type: { type: string }
+        level: { type: string }
+        status: { $ref: "#/components/schemas/ProjectStatus" }
+        fieldId: { type: ["integer", "null"] }
+        leadName: { type: string }
+        leadUnit: { type: string }
+        startYear: { type: integer }
+        endYear: { type: ["integer", "null"] }
+        budget: { type: ["string", "null"] }
+        summary: { type: string }
+        objectives:
+          type: array
+          items: { type: string }
+        results: { type: ["string", "null"] }
+        partners:
+          type: array
+          items: { type: string }
+        milestones:
+          type: array
+          items: { $ref: "#/components/schemas/ProjectMilestone" }
+        keywords:
+          type: array
+          items: { type: string }
+        coverImage: { type: ["string", "null"] }
+    ProjectUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        slug: { type: string }
+        code: { type: string, minLength: 1 }
+        type: { type: string }
+        level: { type: string }
+        status: { $ref: "#/components/schemas/ProjectStatus" }
+        fieldId: { type: ["integer", "null"] }
+        leadName: { type: string }
+        leadUnit: { type: string }
+        startYear: { type: integer }
+        endYear: { type: ["integer", "null"] }
+        budget: { type: ["string", "null"] }
+        summary: { type: string }
+        objectives:
+          type: array
+          items: { type: string }
+        results: { type: ["string", "null"] }
+        partners:
+          type: array
+          items: { type: string }
+        milestones:
+          type: array
+          items: { $ref: "#/components/schemas/ProjectMilestone" }
+        keywords:
+          type: array
+          items: { type: string }
+        coverImage: { type: ["string", "null"] }
+
+    # ------------------------------------------------------------ publications
+    Publication:
+      type: object
+      required:
+        [id, title, authors, venue, type, year, doi, url, abstract, keywords, indexing, isInternational, citationCount,
+         fieldId, fieldName, projectId, projectTitle, projectSlug]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        authors: { type: string }
+        venue: { type: string, description: Tạp chí / Hội nghị / Nhà xuất bản }
+        type: { $ref: "#/components/schemas/PublicationType" }
+        year: { type: integer }
+        doi: { type: ["string", "null"] }
+        url: { type: ["string", "null"] }
+        abstract: { type: string }
+        keywords:
+          type: array
+          items: { type: string }
+        indexing: { type: ["string", "null"], description: "Scopus, ISI/WoS, ACI ..." }
+        isInternational: { type: boolean }
+        citationCount: { type: integer }
+        fieldId: { type: ["integer", "null"] }
+        fieldName: { type: ["string", "null"] }
+        projectId: { type: ["integer", "null"] }
+        projectTitle: { type: ["string", "null"] }
+        projectSlug: { type: ["string", "null"] }
+    PublicationPage:
+      type: object
+      required: [items, total, page, pageSize, totalPages, years, typeCounts]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/Publication" }
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+        totalPages: { type: integer }
+        years:
+          type: array
+          items: { type: integer }
+        typeCounts:
+          type: array
+          items: { $ref: "#/components/schemas/StatusCount" }
+    PublicationInput:
+      type: object
+      required: [title, authors, venue, type, year]
+      properties:
+        title: { type: string, minLength: 1 }
+        authors: { type: string, minLength: 1 }
+        venue: { type: string }
+        type: { $ref: "#/components/schemas/PublicationType" }
+        year: { type: integer }
+        doi: { type: ["string", "null"] }
+        url: { type: ["string", "null"] }
+        abstract: { type: string }
+        keywords:
+          type: array
+          items: { type: string }
+        indexing: { type: ["string", "null"] }
+        isInternational: { type: boolean }
+        citationCount: { type: integer }
+        fieldId: { type: ["integer", "null"] }
+        projectId: { type: ["integer", "null"] }
+    PublicationUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        authors: { type: string, minLength: 1 }
+        venue: { type: string }
+        type: { $ref: "#/components/schemas/PublicationType" }
+        year: { type: integer }
+        doi: { type: ["string", "null"] }
+        url: { type: ["string", "null"] }
+        abstract: { type: string }
+        keywords:
+          type: array
+          items: { type: string }
+        indexing: { type: ["string", "null"] }
+        isInternational: { type: boolean }
+        citationCount: { type: integer }
+        fieldId: { type: ["integer", "null"] }
+        projectId: { type: ["integer", "null"] }
+
+    # ------------------------------------------------------------ datasets
+    DatasetAccessMethod:
+      type: object
+      required: [type, label, url, note]
+      properties:
+        type: { $ref: "#/components/schemas/AccessMethodType" }
+        label: { type: string }
+        url: { type: string, description: "Đường dẫn tải / endpoint API / đường dẫn Object Storage (s3://...)" }
+        note: { type: ["string", "null"] }
+    DatasetColumn:
+      type: object
+      required: [name, type, description]
+      properties:
+        name: { type: string }
+        type: { type: string }
+        description: { type: string }
+    Dataset:
+      type: object
+      required:
+        [id, slug, title, summary, description, fieldId, fieldName, fieldSlug, publisher, contactEmail, license,
+         accessLevel, accessMethods, formats, sizeLabel, recordCount, language, updateFrequency, version, keywords,
+         aiTasks, conditions, columns, coverImage, downloadCount, requestCount, issuedDate, updatedAt]
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        title: { type: string }
+        summary: { type: string }
+        description: { type: string, description: HTML }
+        fieldId: { type: ["integer", "null"] }
+        fieldName: { type: ["string", "null"] }
+        fieldSlug: { type: ["string", "null"] }
+        publisher: { type: string }
+        contactEmail: { type: string }
+        license: { type: string }
+        accessLevel: { $ref: "#/components/schemas/AccessLevel" }
+        accessMethods:
+          type: array
+          items: { $ref: "#/components/schemas/DatasetAccessMethod" }
+        formats:
+          type: array
+          items: { type: string }
+        sizeLabel: { type: string }
+        recordCount: { type: integer }
+        language: { type: string }
+        updateFrequency: { type: string }
+        version: { type: string }
+        keywords:
+          type: array
+          items: { type: string }
+        aiTasks:
+          type: array
+          description: Bài toán AI phù hợp
+          items: { type: string }
+        conditions: { type: string, description: Điều kiện truy cập / sử dụng (HTML) }
+        columns:
+          type: array
+          items: { $ref: "#/components/schemas/DatasetColumn" }
+        coverImage: { type: ["string", "null"] }
+        downloadCount: { type: integer }
+        requestCount: { type: integer }
+        issuedDate: { type: string, description: "YYYY-MM-DD" }
+        updatedAt: { type: string, format: date-time }
+    DatasetDetail:
+      type: object
+      required: [dataset, related]
+      properties:
+        dataset: { $ref: "#/components/schemas/Dataset" }
+        related:
+          type: array
+          items: { $ref: "#/components/schemas/Dataset" }
+    DatasetStats:
+      type: object
+      required: [total, totalRecords, totalDownloads, totalRequests, byAccessLevel, byField, formats]
+      properties:
+        total: { type: integer }
+        totalRecords: { type: integer }
+        totalDownloads: { type: integer }
+        totalRequests: { type: integer }
+        byAccessLevel:
+          type: array
+          items: { $ref: "#/components/schemas/StatusCount" }
+        byField:
+          type: array
+          items: { $ref: "#/components/schemas/LabelCount" }
+        formats:
+          type: array
+          items: { $ref: "#/components/schemas/LabelCount" }
+    DatasetAccessInput:
+      type: object
+      required: [method]
+      properties:
+        method: { $ref: "#/components/schemas/AccessMethodType" }
+    DatasetAccessResult:
+      type: object
+      required: [url, downloadCount]
+      properties:
+        url: { type: string }
+        downloadCount: { type: integer }
+    DatasetInput:
+      type: object
+      required: [title, summary, accessLevel]
+      properties:
+        title: { type: string, minLength: 1 }
+        slug: { type: string }
+        summary: { type: string }
+        description: { type: string }
+        fieldId: { type: ["integer", "null"] }
+        publisher: { type: string }
+        contactEmail: { type: string }
+        license: { type: string }
+        accessLevel: { $ref: "#/components/schemas/AccessLevel" }
+        accessMethods:
+          type: array
+          items: { $ref: "#/components/schemas/DatasetAccessMethod" }
+        formats:
+          type: array
+          items: { type: string }
+        sizeLabel: { type: string }
+        recordCount: { type: integer }
+        language: { type: string }
+        updateFrequency: { type: string }
+        version: { type: string }
+        keywords:
+          type: array
+          items: { type: string }
+        aiTasks:
+          type: array
+          items: { type: string }
+        conditions: { type: string }
+        columns:
+          type: array
+          items: { $ref: "#/components/schemas/DatasetColumn" }
+        coverImage: { type: ["string", "null"] }
+        issuedDate: { type: string }
+    DatasetUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        slug: { type: string }
+        summary: { type: string }
+        description: { type: string }
+        fieldId: { type: ["integer", "null"] }
+        publisher: { type: string }
+        contactEmail: { type: string }
+        license: { type: string }
+        accessLevel: { $ref: "#/components/schemas/AccessLevel" }
+        accessMethods:
+          type: array
+          items: { $ref: "#/components/schemas/DatasetAccessMethod" }
+        formats:
+          type: array
+          items: { type: string }
+        sizeLabel: { type: string }
+        recordCount: { type: integer }
+        language: { type: string }
+        updateFrequency: { type: string }
+        version: { type: string }
+        keywords:
+          type: array
+          items: { type: string }
+        aiTasks:
+          type: array
+          items: { type: string }
+        conditions: { type: string }
+        columns:
+          type: array
+          items: { $ref: "#/components/schemas/DatasetColumn" }
+        coverImage: { type: ["string", "null"] }
+        issuedDate: { type: string }
+
+    # ------------------------------------------------------------ evaluation services
+    ProcessStep:
+      type: object
+      required: [title, description]
+      properties:
+        title: { type: string }
+        description: { type: string }
+    EvaluationService:
+      type: object
+      required:
+        [id, slug, name, summary, description, fieldId, fieldName, standards, process, deliverables, targetAudience,
+         turnaround, feeNote, icon, contactEmail, sortOrder]
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        name: { type: string }
+        summary: { type: string }
+        description: { type: string, description: HTML }
+        fieldId: { type: ["integer", "null"] }
+        fieldName: { type: ["string", "null"] }
+        standards:
+          type: array
+          description: Tiêu chuẩn / quy chuẩn áp dụng
+          items: { type: string }
+        process:
+          type: array
+          items: { $ref: "#/components/schemas/ProcessStep" }
+        deliverables:
+          type: array
+          items: { type: string }
+        targetAudience:
+          type: array
+          items: { type: string }
+        turnaround: { type: string }
+        feeNote: { type: string }
+        icon: { type: string }
+        contactEmail: { type: string }
+        sortOrder: { type: integer }
+
+    # ------------------------------------------------------------ documents
+    DocumentItem:
+      type: object
+      required:
+        [id, number, title, docType, docGroup, issuer, signer, issuedDate, effectiveDate, fieldId, fieldName, projectId,
+         summary, fileUrl, fileName, fileSize, fileFormat, downloadCount, createdAt]
+      properties:
+        id: { type: integer }
+        number: { type: string, description: Số / ký hiệu }
+        title: { type: string, description: Trích yếu }
+        docType: { type: string, description: "Luật, Nghị định, Quyết định, Thông tư, Kế hoạch, Báo cáo, Hướng dẫn ..." }
+        docGroup: { $ref: "#/components/schemas/DocumentGroup" }
+        issuer: { type: string, description: Cơ quan ban hành }
+        signer: { type: ["string", "null"] }
+        issuedDate: { type: string, description: "YYYY-MM-DD" }
+        effectiveDate: { type: ["string", "null"], description: "YYYY-MM-DD" }
+        fieldId: { type: ["integer", "null"] }
+        fieldName: { type: ["string", "null"] }
+        projectId: { type: ["integer", "null"] }
+        summary: { type: ["string", "null"] }
+        fileUrl: { type: ["string", "null"] }
+        fileName: { type: ["string", "null"] }
+        fileSize: { type: ["integer", "null"], description: Bytes }
+        fileFormat: { type: ["string", "null"] }
+        downloadCount: { type: integer }
+        createdAt: { type: string, format: date-time }
+    DocumentFacets:
+      type: object
+      required: [groups, docTypes, issuers, years]
+      properties:
+        groups:
+          type: array
+          items: { $ref: "#/components/schemas/FacetCount" }
+        docTypes:
+          type: array
+          items: { $ref: "#/components/schemas/FacetCount" }
+        issuers:
+          type: array
+          items: { $ref: "#/components/schemas/FacetCount" }
+        years:
+          type: array
+          items: { $ref: "#/components/schemas/FacetCount" }
+    DocumentPage:
+      type: object
+      required: [items, total, page, pageSize, totalPages, facets]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/DocumentItem" }
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+        totalPages: { type: integer }
+        facets: { $ref: "#/components/schemas/DocumentFacets" }
+    DocumentDetail:
+      type: object
+      required: [document, related]
+      properties:
+        document: { $ref: "#/components/schemas/DocumentItem" }
+        related:
+          type: array
+          items: { $ref: "#/components/schemas/DocumentItem" }
+    DownloadResult:
+      type: object
+      required: [fileUrl, downloadCount]
+      properties:
+        fileUrl: { type: ["string", "null"] }
+        downloadCount: { type: integer }
+    DocumentInput:
+      type: object
+      required: [number, title, docType, docGroup, issuer, issuedDate]
+      properties:
+        number: { type: string, minLength: 1 }
+        title: { type: string, minLength: 1 }
+        docType: { type: string, minLength: 1 }
+        docGroup: { $ref: "#/components/schemas/DocumentGroup" }
+        issuer: { type: string, minLength: 1 }
+        signer: { type: ["string", "null"] }
+        issuedDate: { type: string, description: "YYYY-MM-DD" }
+        effectiveDate: { type: ["string", "null"] }
+        fieldId: { type: ["integer", "null"] }
+        projectId: { type: ["integer", "null"] }
+        summary: { type: ["string", "null"] }
+        fileUrl: { type: ["string", "null"] }
+        fileName: { type: ["string", "null"] }
+        fileSize: { type: ["integer", "null"] }
+        fileFormat: { type: ["string", "null"] }
+    DocumentUpdate:
+      type: object
+      properties:
+        number: { type: string, minLength: 1 }
+        title: { type: string, minLength: 1 }
+        docType: { type: string, minLength: 1 }
+        docGroup: { $ref: "#/components/schemas/DocumentGroup" }
+        issuer: { type: string, minLength: 1 }
+        signer: { type: ["string", "null"] }
+        issuedDate: { type: string }
+        effectiveDate: { type: ["string", "null"] }
+        fieldId: { type: ["integer", "null"] }
+        projectId: { type: ["integer", "null"] }
+        summary: { type: ["string", "null"] }
+        fileUrl: { type: ["string", "null"] }
+        fileName: { type: ["string", "null"] }
+        fileSize: { type: ["integer", "null"] }
+        fileFormat: { type: ["string", "null"] }
+
+    # ------------------------------------------------------------ albums
+    AlbumItem:
+      type: object
+      required: [type, url, thumbnailUrl, caption]
+      properties:
+        type: { $ref: "#/components/schemas/AlbumType" }
+        url: { type: string, description: Ảnh hoặc tệp video (mp4) }
+        thumbnailUrl: { type: ["string", "null"] }
+        caption: { type: ["string", "null"] }
+    Album:
+      type: object
+      required: [id, slug, title, type, description, coverImage, eventDate, itemCount, items, createdAt]
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        title: { type: string }
+        type: { $ref: "#/components/schemas/AlbumType" }
+        description: { type: ["string", "null"] }
+        coverImage: { type: ["string", "null"] }
+        eventDate: { type: ["string", "null"], description: "YYYY-MM-DD" }
+        itemCount: { type: integer }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/AlbumItem" }
+        createdAt: { type: string, format: date-time }
+    AlbumInput:
+      type: object
+      required: [title, type]
+      properties:
+        title: { type: string, minLength: 1 }
+        slug: { type: string }
+        type: { $ref: "#/components/schemas/AlbumType" }
+        description: { type: ["string", "null"] }
+        coverImage: { type: ["string", "null"] }
+        eventDate: { type: ["string", "null"] }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/AlbumItem" }
+    AlbumUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        slug: { type: string }
+        type: { $ref: "#/components/schemas/AlbumType" }
+        description: { type: ["string", "null"] }
+        coverImage: { type: ["string", "null"] }
+        eventDate: { type: ["string", "null"] }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/AlbumItem" }
+
+    # ------------------------------------------------------------ about
+    Leader:
+      type: object
+      required: [id, fullName, position, responsibilities, email, phone, bio, photoUrl, sortOrder]
+      properties:
+        id: { type: integer }
+        fullName: { type: string }
+        position: { type: string }
+        responsibilities:
+          type: array
+          items: { type: string }
+        email: { type: ["string", "null"] }
+        phone: { type: ["string", "null"] }
+        bio: { type: ["string", "null"] }
+        photoUrl: { type: ["string", "null"] }
+        sortOrder: { type: integer }
+    OrgUnit:
+      type: object
+      required: [id, name, nameEn, type, headName, headTitle, description, tasks, email, phone, sortOrder]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        nameEn: { type: ["string", "null"] }
+        type: { $ref: "#/components/schemas/OrgUnitType" }
+        headName: { type: ["string", "null"] }
+        headTitle: { type: ["string", "null"] }
+        description: { type: string }
+        tasks:
+          type: array
+          items: { type: string }
+        email: { type: ["string", "null"] }
+        phone: { type: ["string", "null"] }
+        sortOrder: { type: integer }
+
+    # ------------------------------------------------------------ search
+    SearchHit:
+      type: object
+      required: [type, id, title, snippet, url, date]
+      properties:
+        type: { $ref: "#/components/schemas/SearchType" }
+        id: { type: integer }
+        title: { type: string }
+        snippet: { type: ["string", "null"] }
+        url: { type: string, description: Đường dẫn trên trang công khai }
+        date: { type: ["string", "null"] }
+    SearchGroup:
+      type: object
+      required: [type, label, total, items]
+      properties:
+        type: { $ref: "#/components/schemas/SearchType" }
+        label: { type: string }
+        total: { type: integer }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/SearchHit" }
+    SearchResults:
+      type: object
+      required: [query, total, groups]
+      properties:
+        query: { type: string }
+        total: { type: integer }
+        groups:
+          type: array
+          items: { $ref: "#/components/schemas/SearchGroup" }
+
+    # ------------------------------------------------------------ inquiries
+    InquiryInput:
+      type: object
+      required: [type, fullName, email, message]
+      properties:
+        type: { $ref: "#/components/schemas/InquiryType" }
+        fullName: { type: string, minLength: 2 }
+        email: { type: string, minLength: 5 }
+        phone: { type: ["string", "null"] }
+        organization: { type: ["string", "null"] }
+        subject: { type: ["string", "null"] }
+        message: { type: string, minLength: 5 }
+        datasetId: { type: ["integer", "null"] }
+        serviceId: { type: ["integer", "null"] }
+    InquiryReceipt:
+      type: object
+      required: [id, code, type, createdAt, message]
+      properties:
+        id: { type: integer }
+        code: { type: string, description: Mã tiếp nhận }
+        type: { $ref: "#/components/schemas/InquiryType" }
+        createdAt: { type: string, format: date-time }
+        message: { type: string }
+    Inquiry:
+      type: object
+      required:
+        [id, code, type, fullName, email, phone, organization, subject, message, datasetId, datasetTitle, serviceId,
+         serviceName, status, adminNote, handledByName, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        code: { type: string }
+        type: { $ref: "#/components/schemas/InquiryType" }
+        fullName: { type: string }
+        email: { type: string }
+        phone: { type: ["string", "null"] }
+        organization: { type: ["string", "null"] }
+        subject: { type: ["string", "null"] }
+        message: { type: string }
+        datasetId: { type: ["integer", "null"] }
+        datasetTitle: { type: ["string", "null"] }
+        serviceId: { type: ["integer", "null"] }
+        serviceName: { type: ["string", "null"] }
+        status: { $ref: "#/components/schemas/InquiryStatus" }
+        adminNote: { type: ["string", "null"] }
+        handledByName: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    InquiryPage:
+      type: object
+      required: [items, total, page, pageSize, totalPages, statusCounts]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/Inquiry" }
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+        totalPages: { type: integer }
+        statusCounts:
+          type: array
+          items: { $ref: "#/components/schemas/StatusCount" }
+    InquiryUpdate:
+      type: object
+      properties:
+        status: { $ref: "#/components/schemas/InquiryStatus" }
+        adminNote: { type: ["string", "null"] }
+
+    # ------------------------------------------------------------ crawler
+    CrawlSource:
+      type: object
+      required:
+        [id, name, url, categoryId, categoryName, isActive, intervalMinutes, keywords, lastRunAt, nextRunAt, lastStatus,
+         lastMessage, pendingCount, totalCount, createdAt]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        url: { type: string, description: Địa chỉ RSS }
+        categoryId: { type: ["integer", "null"], description: Chuyên mục đích khi chuyển thành bài nháp }
+        categoryName: { type: ["string", "null"] }
+        isActive: { type: boolean }
+        intervalMinutes: { type: integer, description: Chu kỳ thu thập (phút) }
+        keywords:
+          type: array
+          description: Chỉ giữ tin có chứa một trong các từ khóa (để trống = giữ tất cả)
+          items: { type: string }
+        lastRunAt: { type: ["string", "null"], format: date-time }
+        nextRunAt: { type: ["string", "null"], format: date-time }
+        lastStatus: { type: string, description: "never | ok | error" }
+        lastMessage: { type: ["string", "null"] }
+        pendingCount: { type: integer }
+        totalCount: { type: integer }
+        createdAt: { type: string, format: date-time }
+    CrawlSourceInput:
+      type: object
+      required: [name, url]
+      properties:
+        name: { type: string, minLength: 1 }
+        url: { type: string, minLength: 8 }
+        categoryId: { type: ["integer", "null"] }
+        isActive: { type: boolean }
+        intervalMinutes: { type: integer, minimum: 15, maximum: 1440 }
+        keywords:
+          type: array
+          items: { type: string }
+    CrawlSourceUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        url: { type: string, minLength: 8 }
+        categoryId: { type: ["integer", "null"] }
+        isActive: { type: boolean }
+        intervalMinutes: { type: integer, minimum: 15, maximum: 1440 }
+        keywords:
+          type: array
+          items: { type: string }
+    CrawlRunResult:
+      type: object
+      required: [sourceId, sourceName, status, fetched, created, duplicates, filtered, message, ranAt]
+      properties:
+        sourceId: { type: integer }
+        sourceName: { type: string }
+        status: { type: string, description: "ok | error" }
+        fetched: { type: integer }
+        created: { type: integer }
+        duplicates: { type: integer }
+        filtered: { type: integer, description: Bị loại do không khớp từ khóa }
+        message: { type: string }
+        ranAt: { type: string, format: date-time }
+    CrawlItem:
+      type: object
+      required: [id, sourceId, sourceName, title, link, summary, imageUrl, publishedAt, fetchedAt, status, articleId, matchedKeywords]
+      properties:
+        id: { type: integer }
+        sourceId: { type: integer }
+        sourceName: { type: string }
+        title: { type: string }
+        link: { type: string }
+        summary: { type: ["string", "null"] }
+        imageUrl: { type: ["string", "null"] }
+        publishedAt: { type: ["string", "null"], format: date-time }
+        fetchedAt: { type: string, format: date-time }
+        status: { $ref: "#/components/schemas/CrawlItemStatus" }
+        articleId: { type: ["integer", "null"] }
+        matchedKeywords:
+          type: array
+          items: { type: string }
+    CrawlItemPage:
+      type: object
+      required: [items, total, page, pageSize, totalPages, statusCounts]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/CrawlItem" }
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+        totalPages: { type: integer }
+        statusCounts:
+          type: array
+          items: { $ref: "#/components/schemas/StatusCount" }
+    CrawlImportInput:
+      type: object
+      properties:
+        categoryId: { type: ["integer", "null"] }
+
+    # ------------------------------------------------------------ AI
+    AiSuggestInput:
+      type: object
+      required: [task]
+      properties:
+        task: { $ref: "#/components/schemas/AiTask" }
+        title: { type: ["string", "null"] }
+        summary: { type: ["string", "null"] }
+        content: { type: ["string", "null"], description: HTML hoặc văn bản thuần }
+        instruction: { type: ["string", "null"], description: Yêu cầu bổ sung (ví dụ giọng văn trang trọng hơn) }
+    AiIssue:
+      type: object
+      required: [original, suggestion, reason]
+      properties:
+        original: { type: string }
+        suggestion: { type: string }
+        reason: { type: string }
+    AiSuggestion:
+      type: object
+      required: [task, titles, summary, keywords, rewrite, seoTitle, seoDescription, issues, model, generatedAt]
+      properties:
+        task: { $ref: "#/components/schemas/AiTask" }
+        titles:
+          type: array
+          items: { type: string }
+        summary: { type: ["string", "null"] }
+        keywords:
+          type: array
+          items: { type: string }
+        rewrite: { type: ["string", "null"], description: HTML }
+        seoTitle: { type: ["string", "null"] }
+        seoDescription: { type: ["string", "null"] }
+        issues:
+          type: array
+          items: { $ref: "#/components/schemas/AiIssue" }
+        model: { type: string }
+        generatedAt: { type: string, format: date-time }
+
+    # ------------------------------------------------------------ stats / logs / dashboard
+    DailyVisit:
+      type: object
+      required: [date, views, visitors]
+      properties:
+        date: { type: string, description: "YYYY-MM-DD" }
+        views: { type: integer }
+        visitors: { type: integer }
+    PathCount:
+      type: object
+      required: [path, views]
+      properties:
+        path: { type: string }
+        views: { type: integer }
+    ArticleViewCount:
+      type: object
+      required: [id, title, slug, views]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        slug: { type: string }
+        views: { type: integer }
+    VisitStats:
+      type: object
+      required: [days, totalViews, totalVisitors, avgViewsPerDay, daily, topPages, topArticles, devices, referrers, sections]
+      properties:
+        days: { type: integer }
+        totalViews: { type: integer }
+        totalVisitors: { type: integer }
+        avgViewsPerDay: { type: integer }
+        daily:
+          type: array
+          items: { $ref: "#/components/schemas/DailyVisit" }
+        topPages:
+          type: array
+          items: { $ref: "#/components/schemas/PathCount" }
+        topArticles:
+          type: array
+          items: { $ref: "#/components/schemas/ArticleViewCount" }
+        devices:
+          type: array
+          items: { $ref: "#/components/schemas/LabelCount" }
+        referrers:
+          type: array
+          items: { $ref: "#/components/schemas/LabelCount" }
+        sections:
+          type: array
+          description: Lượt xem theo chuyên trang
+          items: { $ref: "#/components/schemas/LabelCount" }
+    ActivityLog:
+      type: object
+      required: [id, actorId, actorName, actorRole, action, actionLabel, entityType, entityId, entityTitle, detail, createdAt]
+      properties:
+        id: { type: integer }
+        actorId: { type: ["integer", "null"] }
+        actorName: { type: string, description: "Tên người thực hiện hoặc 'Hệ thống'" }
+        actorRole: { type: ["string", "null"] }
+        action: { type: string }
+        actionLabel: { type: string, description: Mô tả thao tác bằng tiếng Việt }
+        entityType: { type: string }
+        entityId: { type: ["integer", "null"] }
+        entityTitle: { type: ["string", "null"] }
+        detail: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+    ActivityLogPage:
+      type: object
+      required: [items, total, page, pageSize, totalPages]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/ActivityLog" }
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+        totalPages: { type: integer }
+    DashboardTotals:
+      type: object
+      required: [articles, published, pending, scheduled, documents, datasets, projects, publications, albums, inquiriesNew, crawlPending, users]
+      properties:
+        articles: { type: integer }
+        published: { type: integer }
+        pending: { type: integer }
+        scheduled: { type: integer }
+        documents: { type: integer }
+        datasets: { type: integer }
+        projects: { type: integer }
+        publications: { type: integer }
+        albums: { type: integer }
+        inquiriesNew: { type: integer }
+        crawlPending: { type: integer }
+        users: { type: integer }
+    DashboardSummary:
+      type: object
+      required: [totals, statusCounts, visits, pendingReview, myWork, scheduled, recentActivity, topArticles, crawlSources, recentInquiries]
+      properties:
+        totals: { $ref: "#/components/schemas/DashboardTotals" }
+        statusCounts:
+          type: array
+          items: { $ref: "#/components/schemas/StatusCount" }
+        visits:
+          type: array
+          description: 14 ngày gần nhất
+          items: { $ref: "#/components/schemas/DailyVisit" }
+        pendingReview:
+          type: array
+          items: { $ref: "#/components/schemas/AdminArticleSummary" }
+        myWork:
+          type: array
+          description: Bài nháp / cần chỉnh sửa của người dùng hiện tại
+          items: { $ref: "#/components/schemas/AdminArticleSummary" }
+        scheduled:
+          type: array
+          items: { $ref: "#/components/schemas/AdminArticleSummary" }
+        recentActivity:
+          type: array
+          items: { $ref: "#/components/schemas/ActivityLog" }
+        topArticles:
+          type: array
+          items: { $ref: "#/components/schemas/ArticleViewCount" }
+        crawlSources:
+          type: array
+          items: { $ref: "#/components/schemas/CrawlSource" }
+        recentInquiries:
+          type: array
+          items: { $ref: "#/components/schemas/Inquiry" }
+
+    # ------------------------------------------------------------ backups
+    BackupTableCount:
+      type: object
+      required: [table, rows]
+      properties:
+        table: { type: string }
+        rows: { type: integer }
+    Backup:
+      type: object
+      required: [id, note, createdByName, createdAt, sizeBytes, tables]
+      properties:
+        id: { type: integer }
+        note: { type: ["string", "null"] }
+        createdByName: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        sizeBytes: { type: integer }
+        tables:
+          type: array
+          items: { $ref: "#/components/schemas/BackupTableCount" }
+    BackupInput:
+      type: object
+      properties:
+        note: { type: ["string", "null"] }
+
+    # ------------------------------------------------------------ media
+    MediaItem:
+      type: object
+      required: [id, url, title, alt, type, createdAt]
+      properties:
+        id: { type: integer }
+        url: { type: string }
+        title: { type: string }
+        alt: { type: ["string", "null"] }
+        type: { $ref: "#/components/schemas/MediaType" }
+        createdAt: { type: string, format: date-time }
+    MediaInput:
+      type: object
+      required: [url, title]
+      properties:
+        url: { type: string, minLength: 1 }
+        title: { type: string, minLength: 1 }
+        alt: { type: ["string", "null"] }
+        type: { $ref: "#/components/schemas/MediaType" }

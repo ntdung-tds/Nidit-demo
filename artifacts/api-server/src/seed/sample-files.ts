@@ -1,0 +1,23 @@
+/** Tệp sinh tự động bởi scripts/src/generate-sample-files.ts – kích thước (byte) của tệp mẫu */
+export const FILE_SIZES: Record<string, number> = {
+  "luat-du-lieu-60-2024-qh15.pdf": 38241,
+  "luat-cong-nghiep-cong-nghe-so-71-2025-qh15.pdf": 37614,
+  "luat-khoa-hoc-cong-nghe-doi-moi-sang-tao-93-2025-qh15.pdf": 37775,
+  "nghi-quyet-57-nq-tw.pdf": 39813,
+  "quyet-dinh-749-qd-ttg.pdf": 41174,
+  "quyet-dinh-127-qd-ttg.pdf": 40425,
+  "nghi-dinh-13-2023-nd-cp.pdf": 36711,
+  "thong-bao-tuyen-dung-vien-chuc-2026.pdf": 36711,
+  "huong-dan-khai-thac-du-lieu-ai.pdf": 38923,
+  "huong-dan-dang-ky-danh-gia-kiem-dinh.pdf": 38012,
+  "bao-cao-6-thang-dau-nam-2026.pdf": 37130,
+  "bao-cao-chuyen-doi-so-khu-vuc-cong-2025.pdf": 37147,
+  "bao-cao-ky-thuat-chat-luong-du-lieu.pdf": 35870,
+  "tccs-01-2026-ho-so-sieu-du-lieu.pdf": 37406,
+  "tccs-02-2026-danh-gia-mo-hinh-ai.pdf": 37673,
+  "mau-01-phieu-dang-ky-khai-thac-du-lieu.pdf": 35402,
+  "mau-02-phieu-dang-ky-danh-gia.pdf": 35865,
+  "mau-03-thuyet-minh-de-xuat-nhiem-vu.pdf": 35907,
+  "toan-canh-hoi-thao.mp4": 479777,
+  "phong-thi-nghiem-ai.mp4": 512212,
+};

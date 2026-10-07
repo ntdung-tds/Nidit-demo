@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Trang TTĐT NIDIT"
+description = "Bản demo Trang thông tin điện tử của Viện Công nghệ số và Chuyển đổi số quốc gia: cổng tin tức phong cách báo điện tử (tin tức, lĩnh vực, đề tài – dự án, công bố khoa học, danh mục dữ liệu phục vụ AI, đánh giá – thử nghiệm – kiểm định, văn bản, thư viện, liên hệ) kèm trang quản trị nội dung có phân quyền, quy trình biên tập – phê duyệt, kho tin lấy tự động và AI hỗ trợ biên tập. Dùng để trình bày cùng báo giá cho Viện."
+version = "1.0.0"
+id = "artifacts/nidit-portal"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25481
+
+[services.development]
+run = "pnpm --filter @workspace/nidit-portal run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/nidit-portal", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/nidit-portal/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25481"
+BASE_PATH = "/"

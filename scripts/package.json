@@ -1,0 +1,19 @@
+{
+  "name": "@workspace/scripts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "hello": "tsx ./src/hello.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "sample-files": "tsx ./src/generate-sample-files.ts"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/pdfkit": "^0.17.6",
+    "tsx": "catalog:"
+  },
+  "dependencies": {
+    "pdfkit": "^0.20.2"
+  }
+}

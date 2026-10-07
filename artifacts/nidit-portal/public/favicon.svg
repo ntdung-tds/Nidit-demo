@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Logo tạm thời NIDIT">
+  <defs>
+    <linearGradient id="nidit-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1257A6"/>
+      <stop offset="1" stop-color="#0A2E63"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="31" fill="url(#nidit-bg)"/>
+  <circle cx="32" cy="32" r="26.5" fill="none" stroke="#E2B13C" stroke-width="1.4" stroke-dasharray="3 2.2"/>
+  <path d="M21 43 V21 L43 43 V21" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="21" cy="21" r="3.6" fill="#E2B13C"/>
+  <circle cx="43" cy="43" r="3.6" fill="#E2B13C"/>
+  <circle cx="43" cy="21" r="3.2" fill="#E5484D"/>
+  <circle cx="21" cy="43" r="3.2" fill="#FFFFFF"/>
+</svg>
