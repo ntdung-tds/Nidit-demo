@@ -36,12 +36,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build static demo
+      - name: Build dynamic demo
         run: pnpm --filter @workspace/nidit-portal run build
         env:
           PORT: 4173
           BASE_PATH: /Nidit-demo/
           VITE_GITHUB_PAGES: "true"
+          VITE_API_BASE_URL: "https://66t9uc18mn3.sisko.replit.dev"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
