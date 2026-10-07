@@ -83,9 +83,9 @@ export function StaticPageRoute() {
 }
 
 const ORG_TYPES: { type: OrgUnit['type']; vi: string; en: string; icon: typeof Users }[] = [
-  { type: 'council', vi: 'Hội đồng', en: 'Council', icon: Landmark },
-  { type: 'office', vi: 'Khối văn phòng', en: 'Office block', icon: Briefcase },
-  { type: 'department', vi: 'Các ban, phòng chuyên môn', en: 'Professional divisions', icon: Building2 },
+  { type: 'council', vi: 'Hội đồng', en: 'Councils', icon: Landmark },
+  { type: 'office', vi: 'Khối văn phòng', en: 'Offices', icon: Briefcase },
+  { type: 'department', vi: 'Các ban, phòng chuyên môn', en: 'Departments', icon: Building2 },
   { type: 'center', vi: 'Các trung tâm', en: 'Centres', icon: FlaskConical },
 ];
 
@@ -103,78 +103,59 @@ export function OrgPage() {
     <AboutShell title={title}>
       {units.isLoading ? <div className="space-y-4"><Skeleton className="h-24" /><Skeleton className="h-40" /></div> : units.isError ? <ErrorState onRetry={() => units.refetch()} /> : (
         <div className="space-y-10">
-          <section aria-label={t('Sơ đồ cơ cấu tổ chức', 'Organisation chart')}>
-            {/* Cấp lãnh đạo */}
-            <div className="flex flex-col items-center">
-              <div className={cn(leadershipCard, 'min-h-[104px] max-w-3xl px-3 py-4 sm:min-h-[116px] sm:px-5 sm:py-5')}>
-                <div className="text-[0.62rem] font-semibold uppercase tracking-[0.11em] text-gold sm:text-[0.72rem] sm:tracking-[0.12em]">{t('Lãnh đạo Viện', 'Leadership')}</div>
-                <div className="mt-1.5 font-display text-[0.94rem] font-semibold leading-snug sm:mt-2 sm:text-[1.18rem]">
-                  {director ? `${director.position}: ${director.fullName}` : t('Viện trưởng', 'Director')}
+          {/* Sơ đồ lãnh đạo */}
+          <div className="flex flex-col items-center">
+            <div className={cn(leadershipCard, 'min-h-[104px] max-w-3xl px-3 py-4 sm:min-h-[116px] sm:px-5 sm:py-5')}>
+              <div className="text-[0.62rem] font-semibold uppercase tracking-[0.11em] text-gold sm:text-[0.72rem] sm:tracking-[0.12em]">{t('Lãnh đạo Viện', 'Leadership')}</div>
+              <div className="mt-1.5 font-display text-[0.94rem] font-semibold leading-snug sm:mt-2 sm:text-[1.18rem]">
+                {director ? `${director.position}: ${director.fullName}` : t('Viện trưởng', 'Director')}
+              </div>
+            </div>
+
+            {deputyDirectors.length > 0 && (
+              <div className="w-full max-w-3xl">
+                <div className="mx-auto h-5 w-px bg-navy sm:h-7" />
+                <div className="relative h-5 sm:h-7">
+                  <div className="absolute left-1/4 right-1/4 top-0 h-px bg-navy" />
+                  <div className="absolute left-1/4 top-0 h-5 w-px bg-navy sm:h-7" />
+                  <div className="absolute right-1/4 top-0 h-5 w-px bg-navy sm:h-7" />
+                </div>
+                <div className="grid grid-cols-2 items-stretch gap-2 sm:gap-4">
+                  {deputyDirectors.map((leader) => (
+                    <div key={leader.id} className={cn(leadershipCard, 'min-h-[112px] px-2 py-3 sm:min-h-[116px] sm:px-5 sm:py-5')}>
+                      <div className="text-[0.56rem] font-semibold uppercase leading-tight tracking-[0.08em] text-gold sm:text-[0.72rem] sm:tracking-[0.12em]">{leader.position}</div>
+                      <div className="mt-2 font-display text-[0.82rem] font-semibold leading-[1.18] sm:text-[1.18rem] sm:leading-snug">{leader.fullName}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
-
-              {deputyDirectors.length > 0 && (
-                <div className="w-full max-w-3xl">
-                  <div className="mx-auto h-5 w-px bg-navy sm:h-7" />
-                  <div className="relative h-5 sm:h-7">
-                    <div className="absolute left-1/4 right-1/4 top-0 h-px bg-navy" />
-                    <div className="absolute left-1/4 top-0 h-5 w-px bg-navy sm:h-7" />
-                    <div className="absolute right-1/4 top-0 h-5 w-px bg-navy sm:h-7" />
-                  </div>
-                  <div className="grid grid-cols-2 items-stretch gap-2 sm:gap-4">
-                    {deputyDirectors.map((leader) => (
-                      <div key={leader.id} className={cn(leadershipCard, 'min-h-[112px] px-2 py-3 sm:min-h-[116px] sm:px-5 sm:py-5')}>
-                        <div className="text-[0.56rem] font-semibold uppercase leading-tight tracking-[0.08em] text-gold sm:text-[0.72rem] sm:tracking-[0.12em]">{leader.position}</div>
-                        <div className="mt-2 font-display text-[0.82rem] font-semibold leading-[1.18] sm:text-[1.18rem] sm:leading-snug">{leader.fullName}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Trục từ lãnh đạo xuống các khối trực thuộc */}
-            <div className="mx-auto h-7 w-px bg-navy sm:h-9" />
-            <div className="relative hidden h-8 lg:block">
-              <div className="absolute left-[12.5%] right-[12.5%] top-0 h-px bg-navy" />
-              <div className="absolute left-[12.5%] top-0 h-8 w-px bg-navy" />
-              <div className="absolute left-[37.5%] top-0 h-8 w-px bg-navy" />
-              <div className="absolute left-[62.5%] top-0 h-8 w-px bg-navy" />
-              <div className="absolute left-[87.5%] top-0 h-8 w-px bg-navy" />
-            </div>
-
-            {/* Bốn nhánh đơn vị trực thuộc */}
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {ORG_TYPES.map((g) => {
-                const list = (units.data ?? []).filter((u) => u.type === g.type).sort((a, b) => a.sortOrder - b.sortOrder);
-                if (!list.length) return null;
-                const Icon = g.icon;
-                return (
-                  <article key={g.type} className="overflow-hidden border border-rule bg-card shadow-sm" data-testid={`org-branch-${g.type}`}>
-                    <div className="flex min-h-[72px] items-center justify-center gap-2 bg-navy px-3 py-3 text-center">
-                      <Icon className="h-4 w-4 shrink-0 text-gold" />
-                      <h2 className="text-[0.72rem] font-bold uppercase leading-snug tracking-[0.06em] text-gold sm:text-[0.78rem]">{lang === 'en' ? g.en : g.vi}</h2>
-                    </div>
-                    <div className="divide-y divide-rule">
-                      {list.map((u) => (
-                        <div key={u.id} className="flex min-h-[70px] items-center gap-2.5 px-3 py-3" data-testid={`card-org-${u.id}`}>
-                          <span className="h-1.5 w-1.5 shrink-0 bg-seal" />
-                          <div className="min-w-0">
-                            <h3 className="font-display text-[0.9rem] font-semibold leading-snug text-ink">{lang === 'en' && u.nameEn ? u.nameEn : u.name}</h3>
-                            {u.headName && <p className="mt-1 text-[0.7rem] leading-snug text-muted-foreground">{u.headTitle ?? t('Phụ trách', 'Head')}: {u.headName}</p>}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          </section>
-
-          <div className="border-t border-rule pt-4 text-sm leading-relaxed text-muted-foreground">
-            {t('Các đơn vị được sắp xếp theo nhóm chức năng trực thuộc Viện. Nội dung được đồng bộ từ dữ liệu quản trị cơ cấu tổ chức.', 'Units are grouped by their functions under the Institute and synchronized from organisation management data.')}
+            )}
           </div>
+          {ORG_TYPES.map((g) => {
+            const list = (units.data ?? []).filter((u) => u.type === g.type).sort((a, b) => a.sortOrder - b.sortOrder);
+            if (!list.length) return null;
+            return (
+              <section key={g.type}>
+                <h2 className="mb-4 flex items-center gap-2 border-b-2 border-ink pb-1.5 text-sm font-bold uppercase tracking-[0.06em] text-ink"><g.icon className="h-4 w-4 text-seal" />{lang === 'en' ? g.en : g.vi}<span className="num ml-auto text-xs font-medium text-muted-foreground">{list.length}</span></h2>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {list.map((u) => (
+                    <article key={u.id} className="border border-rule border-t-[3px] border-t-navy bg-card p-5" data-testid={`card-org-${u.id}`}>
+                      <h3 className="font-display text-[1.05rem] font-semibold text-ink">{lang === 'en' && u.nameEn ? u.nameEn : u.name}</h3>
+                      {u.headName && <p className="mt-1 text-sm"><span className="text-muted-foreground">{u.headTitle ?? t('Phụ trách', 'Head')}:</span> <strong>{u.headName}</strong></p>}
+                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{u.description}</p>
+                      {u.tasks.length > 0 && <ul className="mt-3 space-y-1 text-sm">{u.tasks.slice(0, 4).map((tk, i) => <li key={i} className="flex gap-2"><span className="mt-2 h-1 w-1 shrink-0 bg-seal" />{tk}</li>)}</ul>}
+                      {(u.email || u.phone) && (
+                        <div className="meta mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-rule pt-2.5">
+                          {u.email && <a href={`mailto:${u.email}`} className="inline-flex items-center gap-1 hover:text-navy"><Mail className="h-3 w-3" />{u.email}</a>}
+                          {u.phone && <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" />{u.phone}</span>}
+                        </div>
+                      )}
+                    </article>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
         </div>
       )}
     </AboutShell>
