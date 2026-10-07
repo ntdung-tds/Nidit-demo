@@ -21,29 +21,39 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const updateMotion = () => { setReducedMotion(media.matches); if (media.matches) setPaused(true); };
+    const updateMotion = () => {
+      setReducedMotion(media.matches);
+      if (media.matches) setPaused(true);
+    };
     const updateVisibility = () => setPageHidden(document.hidden);
     media.addEventListener('change', updateMotion);
     document.addEventListener('visibilitychange', updateVisibility);
-    return () => { media.removeEventListener('change', updateMotion); document.removeEventListener('visibilitychange', updateVisibility); };
+    return () => {
+      media.removeEventListener('change', updateMotion);
+      document.removeEventListener('visibilitychange', updateVisibility);
+    };
   }, []);
 
   useEffect(() => {
     if (!api) return;
     const update = () => setSelected(api.selectedScrollSnap());
-    const stopOnDrag = () => setPaused(true);
     update();
-    api.on('select', update).on('reInit', update).on('pointerDown', stopOnDrag);
-    return () => { api.off('select', update).off('reInit', update).off('pointerDown', stopOnDrag); };
+    api.on('select', update).on('reInit', update);
+    return () => {
+      api.off('select', update).off('reInit', update);
+    };
   }, [api]);
 
+  // Use a one-shot timeout instead of a permanent interval. Every real slide
+  // change (including a manual swipe/click) resets the 7-second countdown.
+  // Vertical page scrolling on touch devices therefore never pauses autoplay.
   useEffect(() => {
     if (!api || !rotating) return;
-    const timer = window.setInterval(() => api.scrollNext(), INTERVAL_MS);
-    return () => window.clearInterval(timer);
-  }, [api, rotating]);
+    const timer = window.setTimeout(() => api.scrollNext(), INTERVAL_MS);
+    return () => window.clearTimeout(timer);
+  }, [api, rotating, selected]);
 
-  const changeSlide = (index: number) => { setPaused(true); api?.scrollTo(index); };
+  const changeSlide = (index: number) => api?.scrollTo(index);
   const controlClass = 'grid h-11 w-11 shrink-0 place-items-center border border-rule text-navy transition-colors hover:border-navy hover:bg-navy hover:text-white';
 
   return (
@@ -53,16 +63,21 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
       aria-label={isEvents ? t('Sự kiện – Hội thảo', 'Events & Conferences') : t('Tin nổi bật', 'Top stories')}
       className="min-w-0"
       data-testid="event-carousel"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onFocusCapture={(event) => {
-        // Let the playback button handle its own state; focusing it on a mouse
-        // click must not turn a requested pause into an immediate resume.
-        if ((event.target as HTMLElement).dataset.testid !== 'button-slide-pause') setPaused(true);
+      onPointerEnter={(event) => {
+        if (event.pointerType === 'mouse') setHovered(true);
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType === 'mouse') setHovered(false);
       }}
       onKeyDown={(event) => {
-        if (event.key === 'ArrowLeft') { event.preventDefault(); setPaused(true); api?.scrollPrev(); }
-        if (event.key === 'ArrowRight') { event.preventDefault(); setPaused(true); api?.scrollNext(); }
+        if (event.key === 'ArrowLeft') {
+          event.preventDefault();
+          api?.scrollPrev();
+        }
+        if (event.key === 'ArrowRight') {
+          event.preventDefault();
+          api?.scrollNext();
+        }
       }}
     >
       <div className="mb-3 flex items-center justify-between gap-3 border-b-2 border-ink pb-2">
@@ -108,9 +123,9 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
             ))}
           </div>
           <div className="flex gap-1.5">
-            <button className={controlClass} onClick={() => { setPaused(true); api?.scrollPrev(); }} aria-label={t('Bài trước', 'Previous story')} data-testid="button-slide-prev"><ChevronLeft className="h-4 w-4" /></button>
+            <button className={controlClass} onClick={() => api?.scrollPrev()} aria-label={t('Bài trước', 'Previous story')} data-testid="button-slide-prev"><ChevronLeft className="h-4 w-4" /></button>
             <button className={controlClass} onClick={() => setPaused((value) => !value)} aria-label={paused ? t('Tiếp tục trình chiếu', 'Resume slideshow') : t('Tạm dừng trình chiếu', 'Pause slideshow')} data-testid="button-slide-pause">{paused ? <Play className="h-3.5 w-3.5" /> : <Pause className="h-3.5 w-3.5" />}</button>
-            <button className={controlClass} onClick={() => { setPaused(true); api?.scrollNext(); }} aria-label={t('Bài tiếp theo', 'Next story')} data-testid="button-slide-next"><ChevronRight className="h-4 w-4" /></button>
+            <button className={controlClass} onClick={() => api?.scrollNext()} aria-label={t('Bài tiếp theo', 'Next story')} data-testid="button-slide-next"><ChevronRight className="h-4 w-4" /></button>
           </div>
         </div>
       )}
