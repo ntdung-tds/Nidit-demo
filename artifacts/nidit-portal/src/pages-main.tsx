@@ -14,6 +14,7 @@ import { setPagesDataSource } from './pages-data-source';
 
 import './index.css';
 import './pages-mobile-fixes.css';
+import './admin/admin.css';
 
 const PagesDemoApp = lazy(() => import('@/admin/PagesDemoApp'));
 const remoteApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
