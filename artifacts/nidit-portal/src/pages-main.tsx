@@ -16,6 +16,25 @@ import './index.css';
 
 const PagesDemoApp = lazy(() => import('@/admin/PagesDemoApp'));
 const remoteApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+const readableSourceLinks: Record<string, string> = {
+  'https://mst.gov.vn/rss/tin-tuc-su-kien/chuyen-doi-so.rss': 'https://mst.gov.vn/so-lieu-thong-ke/chuyen-doi-so.htm',
+  'https://congbao.chinhphu.vn/cac-van-ban-moi-ban-hanh.rss': 'https://congbao.chinhphu.vn/van-ban-dang-cong-bao.htm',
+};
+
+function rewriteRawFeedLinks() {
+  document.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((anchor) => {
+    const raw = anchor.getAttribute('href');
+    const readable = raw ? readableSourceLinks[raw] : undefined;
+    if (!readable) return;
+    anchor.dataset.rssFeed = raw!;
+    anchor.href = readable;
+    anchor.title = 'Mở trang nguồn';
+  });
+}
+
+const sourceLinkObserver = new MutationObserver(rewriteRawFeedLinks);
+sourceLinkObserver.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['href'] });
+rewriteRawFeedLinks();
 
 setAuthTokenGetter(() => getAdminToken());
 setPagesDataSource(remoteApiBaseUrl ? 'live' : 'snapshot', snapshotCapturedAt);
