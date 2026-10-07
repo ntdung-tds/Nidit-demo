@@ -1,6 +1,131 @@
 (() => {
   const CONTACT_PATH = '#/lien-he';
+  const CRM_PATH = '#/quan-tri';
+  const SESSION_KEY = 'nidit_crm_demo_session_v1';
+  const ADMIN_TOKEN_KEY = 'nidit_admin_token';
   const text = (el) => (el?.textContent || '').replace(/\s+/g, ' ').trim();
+  const isMobile = () => window.matchMedia('(max-width: 639px)').matches;
+
+  function patchMobileMasthead() {
+    if (!isMobile()) return;
+    const el = document.querySelector('[data-testid="text-site-name"]');
+    if (!el) return;
+    const spans = el.querySelectorAll('span.sm\\:hidden');
+    if (spans.length < 2) return;
+
+    const logoLink = el.closest('[data-testid="link-home-logo"]');
+    if (logoLink) logoLink.style.flex = '1 1 auto';
+    const textWrap = el.parentElement;
+    if (textWrap) {
+      textWrap.style.flex = '1 1 auto';
+      textWrap.style.minWidth = '0';
+    }
+
+    el.style.lineHeight = '1.22';
+    el.style.width = '100%';
+
+    spans[0].style.fontSize = 'clamp(0.84rem, 4vw, 1.04rem)';
+    spans[0].style.letterSpacing = '-0.012em';
+    spans[0].style.lineHeight = '1.14';
+
+    spans[1].style.fontSize = 'clamp(0.84rem, 4vw, 1.04rem)';
+    spans[1].style.letterSpacing = '-0.018em';
+    spans[1].style.lineHeight = '1.14';
+    spans[1].style.marginTop = '0.12em';
+  }
+
+  function isAdminSession() {
+    try {
+      return sessionStorage.getItem(SESSION_KEY) === '1' || !!localStorage.getItem(ADMIN_TOKEN_KEY);
+    } catch {
+      return false;
+    }
+  }
+
+  function clearAdminSession() {
+    try {
+      sessionStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(ADMIN_TOKEN_KEY);
+    } catch {
+      // no-op for restricted storage contexts
+    }
+  }
+
+  function hideLegacyAdminRows(dialog) {
+    const labels = new Set([
+      'quản trị / crm',
+      'đăng nhập / quản trị crm',
+      'mở quản trị / crm',
+      'đăng xuất quản trị',
+      'admin / crm',
+      'sign in / admin crm',
+      'open admin / crm',
+      'sign out of admin',
+    ]);
+
+    dialog.querySelectorAll('a,button').forEach((el) => {
+      if (el.closest('[data-demo-account-row="1"]')) return;
+      const label = text(el).toLowerCase();
+      if (!labels.has(label)) return;
+      const li = el.closest('li');
+      if (li && text(li).toLowerCase() === label) li.style.display = 'none';
+      else el.style.display = 'none';
+    });
+  }
+
+  function patchMobileAccountMenu() {
+    const dialog = document.querySelector('[role="dialog"]');
+    if (!dialog) return;
+
+    hideLegacyAdminRows(dialog);
+
+    const contact = Array.from(dialog.querySelectorAll('a')).find((a) => {
+      const href = a.getAttribute('href') || '';
+      const label = text(a).toLowerCase();
+      return href.includes('/lien-he') || label.includes('thông tin liên hệ') || label === 'liên hệ';
+    });
+    if (!contact) return;
+
+    const contactLi = contact.closest('li');
+    if (!contactLi || !contactLi.parentElement) return;
+
+    let row = dialog.querySelector('[data-demo-account-row="1"]');
+    if (!row) {
+      row = document.createElement('li');
+      row.dataset.demoAccountRow = '1';
+      row.style.position = 'relative';
+      contactLi.insertAdjacentElement('afterend', row);
+    } else if (row.previousElementSibling !== contactLi) {
+      contactLi.insertAdjacentElement('afterend', row);
+    }
+
+    const loggedIn = isAdminSession();
+    if (!loggedIn) {
+      row.innerHTML = `<a href="${CRM_PATH}" class="${contact.className}">Đăng nhập / Quản trị CRM</a>`;
+      return;
+    }
+
+    row.innerHTML = `
+      <button type="button" data-demo-account-toggle="1" class="${contact.className}" style="display:flex;width:100%;align-items:center;justify-content:space-between;text-align:left;border:0;background:transparent;cursor:pointer">
+        <span>Quản trị viên demo</span><span aria-hidden="true" style="font-size:12px;opacity:.55">⌄</span>
+      </button>
+      <div data-demo-account-actions="1" style="display:none;padding:0 0 8px 0">
+        <a href="${CRM_PATH}" style="display:block;padding:6px 16px 6px 32px;font-size:14px;color:#596273;text-decoration:none">Mở Quản trị / CRM</a>
+        <button type="button" data-demo-logout="1" style="display:block;width:100%;border:0;background:transparent;padding:6px 16px 6px 32px;text-align:left;font:inherit;font-size:14px;color:#596273;cursor:pointer">Đăng xuất</button>
+      </div>`;
+
+    const toggle = row.querySelector('[data-demo-account-toggle="1"]');
+    const actions = row.querySelector('[data-demo-account-actions="1"]');
+    toggle?.addEventListener('click', () => {
+      if (!actions) return;
+      actions.style.display = actions.style.display === 'none' ? 'block' : 'none';
+    });
+
+    row.querySelector('[data-demo-logout="1"]')?.addEventListener('click', () => {
+      clearAdminSession();
+      row.innerHTML = `<a href="${CRM_PATH}" class="${contact.className}">Đăng nhập / Quản trị CRM</a>`;
+    });
+  }
 
   function field(label, name, type = 'text', required = false) {
     return `<label style="display:block;font-size:12px;font-weight:600;margin-bottom:14px">${label}${required ? ' <span style="color:#b42318">*</span>' : ''}<input name="${name}" type="${type}" ${required ? 'required' : ''} style="display:block;width:100%;margin-top:6px;border:1px solid #cfd4dc;background:#fff;padding:10px 11px;font:inherit;box-sizing:border-box" /></label>`;
@@ -76,6 +201,8 @@
   }
 
   function patchAll() {
+    patchMobileMasthead();
+    patchMobileAccountMenu();
     patchContactForm();
     patchContactMap();
   }
@@ -83,6 +210,7 @@
   const observer = new MutationObserver(() => requestAnimationFrame(patchAll));
   observer.observe(document.documentElement, { childList: true, subtree: true });
   window.addEventListener('hashchange', () => setTimeout(patchAll, 20));
+  window.addEventListener('resize', patchAll);
   document.addEventListener('DOMContentLoaded', patchAll);
   patchAll();
 })();
