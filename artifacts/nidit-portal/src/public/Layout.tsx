@@ -5,10 +5,34 @@ import { vi as viLocale, enGB } from 'date-fns/locale';
 import { ChevronDown, Home, Info, Mail, MapPin, Menu, Phone, Rss, Search, Clock, X, ExternalLink, Network, Users } from 'lucide-react';
 import { useGetSiteSettings, useGetVisitCounter, useListMenuItems, getListMenuItemsQueryKey, getGetVisitCounterQueryKey } from '@workspace/api-client-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { clearAdminToken, getAdminToken } from '@/lib/admin-token';
 import { cn } from '@/lib/utils';
 import { asset, buildMenuTree, fmtNum, isArticlePath, usePortal, useTracker, type MenuNode } from './lib';
 import { SmartLink } from './ui';
 import { ExternalNewsDemo } from './ExternalNewsDemo';
+
+const CRM_DEMO_SESSION = 'nidit_crm_demo_session_v1';
+const READABLE_SOURCE_LINKS: Record<string, string> = {
+  'https://mst.gov.vn/rss/tin-tuc-su-kien/chuyen-doi-so.rss': 'https://mst.gov.vn/so-lieu-thong-ke/chuyen-doi-so.htm',
+  'https://congbao.chinhphu.vn/cac-van-ban-moi-ban-hanh.rss': 'https://congbao.chinhphu.vn/van-ban-dang-cong-bao.htm',
+};
+
+function useReadableSourceLinks() {
+  const [loc] = useLocation();
+  useEffect(() => {
+    const id = window.requestAnimationFrame(() => {
+      document.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((anchor) => {
+        const raw = anchor.getAttribute('href');
+        const readable = raw ? READABLE_SOURCE_LINKS[raw] : undefined;
+        if (!readable) return;
+        anchor.dataset.rssFeed = raw!;
+        anchor.href = readable;
+        anchor.title = 'Mở trang nguồn';
+      });
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [loc]);
+}
 
 function useMenu(location: 'main' | 'footer' | 'links') {
   const params = { location } as const;
@@ -173,40 +197,64 @@ function DesktopNav({ tree }: { tree: MenuNode[] }) {
 
 function MobileNav({ tree }: { tree: MenuNode[] }) {
   const [open, setOpen] = useState(false);
+  const [, navigate] = useLocation();
   const label = useMenuLabel();
   const { t, lang, setLang } = usePortal();
+  const [adminSession, setAdminSession] = useState(() => import.meta.env.VITE_GITHUB_PAGES === 'true' ? sessionStorage.getItem(CRM_DEMO_SESSION) === '1' : !!getAdminToken());
   const close = () => setOpen(false);
+  const logoutAdmin = () => {
+    sessionStorage.removeItem(CRM_DEMO_SESSION);
+    clearAdminToken();
+    setAdminSession(false);
+    close();
+    navigate('/');
+  };
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={open} onOpenChange={(next) => {
+      setOpen(next);
+      if (next) setAdminSession(import.meta.env.VITE_GITHUB_PAGES === 'true' ? sessionStorage.getItem(CRM_DEMO_SESSION) === '1' : !!getAdminToken());
+    }}>
       <SheetTrigger asChild>
         <button className="grid h-11 w-11 place-items-center hover:bg-white/10 xl:hidden" aria-label={t('Mở menu', 'Open menu')} data-testid="button-mobile-menu"><Menu className="h-5 w-5" /></button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-[88vw] max-w-sm overflow-y-auto bg-paper p-0">
-        <SheetHeader className="border-b border-rule bg-navy p-4 text-left">
+      <SheetContent side="left" className="flex h-[100dvh] max-h-[100dvh] w-[88vw] max-w-sm flex-col overflow-hidden bg-paper p-0">
+        <SheetHeader className="shrink-0 border-b border-rule bg-navy p-4 text-left">
           <SheetTitle className="font-display text-base text-white">NIDIT</SheetTitle>
         </SheetHeader>
-        <div className="p-4"><SearchBox onDone={close} /></div>
-        <nav aria-label={t('Menu chính', 'Main menu')}>
-          <ul className="border-t border-rule">
-            <li><Link href="/" onClick={close} className="block border-b border-rule px-4 py-3 text-sm font-semibold">{t('Trang chủ', 'Home')}</Link></li>
-            {tree.filter((n) => n.url !== '/').map((n) => (
-              <li key={n.id} className="border-b border-rule">
-                <SmartLink href={n.url} newTab={n.openInNewTab} onClick={close} className="block px-4 py-3 text-sm font-semibold">{label(n)}</SmartLink>
-                {n.children.length > 0 && (
-                  <ul className="pb-2">
-                    {n.children.map((c) => (
-                      <li key={c.id}><SmartLink href={c.url} newTab={c.openInNewTab} onClick={close} className="block py-1.5 pl-8 pr-4 text-sm text-muted-foreground hover:text-navy">{label(c)}</SmartLink></li>
-                    ))}
-                  </ul>
-                )}
-              </li>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain touch-pan-y">
+          <div className="p-4"><SearchBox onDone={close} /></div>
+          <nav aria-label={t('Menu chính', 'Main menu')}>
+            <ul className="border-t border-rule">
+              <li><Link href="/" onClick={close} className="block border-b border-rule px-4 py-3 text-sm font-semibold">{t('Trang chủ', 'Home')}</Link></li>
+              {tree.filter((n) => n.url !== '/').map((n) => (
+                <li key={n.id} className="border-b border-rule">
+                  <SmartLink href={n.url} newTab={n.openInNewTab} onClick={close} className="block px-4 py-3 text-sm font-semibold">{label(n)}</SmartLink>
+                  {n.children.length > 0 && (
+                    <ul className="pb-2">
+                      {n.children.map((c) => (
+                        <li key={c.id}><SmartLink href={c.url} newTab={c.openInNewTab} onClick={close} className="block py-1.5 pl-8 pr-4 text-sm text-muted-foreground hover:text-navy">{label(c)}</SmartLink></li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <div className="flex gap-2 p-4">
+            {(['vi', 'en'] as const).map((l) => (
+              <button key={l} onClick={() => setLang(l)} className={cn('border px-3 py-1 text-xs font-semibold', lang === l ? 'border-navy bg-navy text-white' : 'border-rule')}>{l === 'vi' ? 'Tiếng Việt' : 'English'}</button>
             ))}
-          </ul>
-        </nav>
-        <div className="flex gap-2 p-4">
-          {(['vi', 'en'] as const).map((l) => (
-            <button key={l} onClick={() => setLang(l)} className={cn('border px-3 py-1 text-xs font-semibold', lang === l ? 'border-navy bg-navy text-white' : 'border-rule')}>{l === 'vi' ? 'Tiếng Việt' : 'English'}</button>
-          ))}
+          </div>
+          <div className="border-t border-rule p-4">
+            {adminSession ? (
+              <div className="space-y-2">
+                <Link href="/quan-tri" onClick={close} className="flex items-center justify-center gap-2 bg-navy px-3 py-2.5 text-sm font-semibold text-white"><Users className="h-4 w-4" />{t('Mở Quản trị / CRM', 'Open Admin / CRM')}</Link>
+                <button onClick={logoutAdmin} className="flex w-full items-center justify-center gap-2 border border-rule px-3 py-2.5 text-sm font-semibold text-muted-foreground hover:border-seal hover:text-seal"><X className="h-4 w-4" />{t('Đăng xuất quản trị', 'Sign out of admin')}</button>
+              </div>
+            ) : (
+              <Link href="/quan-tri" onClick={close} className="flex items-center justify-center gap-2 bg-navy px-3 py-2.5 text-sm font-semibold text-white"><Users className="h-4 w-4" />{t('Đăng nhập / Quản trị CRM', 'Sign in / Admin CRM')}</Link>
+            )}
+          </div>
         </div>
       </SheetContent>
     </Sheet>
@@ -217,7 +265,7 @@ function Header() {
   const { tree } = useMenu('main');
   const { t } = usePortal();
   return (
-    <header>
+    <header className="min-w-0 overflow-x-clip">
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-[100] focus:bg-card focus:px-3 focus:py-2">{t('Bỏ qua đến nội dung', 'Skip to content')}</a>
       <TopBar />
       <Masthead />
@@ -266,7 +314,7 @@ function Footer() {
             </div>
           </div>
           <dl className="mt-5 space-y-1.5 text-sm">
-            <div><dt className="inline text-white/55">{t('Cơ quan chủ quản', 'Governing body')}: </dt><dd className="inline">{s && <a href={s.parentPortalUrl} target="_blank" rel="noopener noreferrer" className="text-white underline-offset-2 hover:underline">{lang === 'en' ? s.parentOrgEn : s.parentOrg}</a>}</dd></div>
+            <div><dt className="inline text-white/55">{t('Cơ quan chủ quản', 'Governing body')}: </dt><dd className="inline">{s && <a href={s.parentPortalUrl} target="_blank" rel="noopener noreferrer" className="text-white underline-offset-2 hover:underline">{lang === 'en'' ? s.parentOrgEn : s.parentOrg}</a>}</dd></div>
             <div><dt className="inline text-white/55">{t('Người chịu trách nhiệm', 'Responsible person')}: </dt><dd className="inline text-white" data-testid="text-responsible">{s?.responsiblePerson} – {s?.responsibleTitle}</dd></div>
           </dl>
         </div>
@@ -331,12 +379,13 @@ function RouteTracker() {
 
 export function PortalLayout({ children }: { children: ReactNode }) {
   const [loc] = useLocation();
+  useReadableSourceLinks();
   return (
-    <div className="flex min-h-[100dvh] flex-col">
+    <div className="flex min-h-[100dvh] min-w-0 flex-col overflow-x-clip">
       <RouteTracker />
       <DemoNotice />
       <Header />
-      <main id="main" className="flex-1">
+      <main id="main" className="min-w-0 flex-1 overflow-x-clip">
         {children}
         {loc === '/' && <ExternalNewsDemo />}
       </main>
