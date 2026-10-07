@@ -95,18 +95,41 @@ export function OrgPage() {
   useSeo(title, null);
   const units = useListOrgUnits();
   const leaders = useListLeaders();
+  const leadership = [...(leaders.data ?? [])].sort((a, b) => a.sortOrder - b.sortOrder);
+  const director = leadership[0];
+  const deputyDirectors = leadership.slice(1, 3);
+  const leadershipCard = 'flex min-h-[116px] w-full flex-col items-center justify-center border-2 border-navy bg-navy px-5 py-5 text-center text-white';
   return (
     <AboutShell title={title}>
       {units.isLoading ? <div className="space-y-4"><Skeleton className="h-24" /><Skeleton className="h-40" /></div> : units.isError ? <ErrorState onRetry={() => units.refetch()} /> : (
         <div className="space-y-10">
-          {/* chart head */}
+          {/* Sơ đồ lãnh đạo */}
           <div className="flex flex-col items-center">
-            <div className="border-2 border-navy bg-navy px-6 py-3 text-center text-white">
-              <div className="text-[0.65rem] uppercase tracking-[0.12em] text-gold">{t('Lãnh đạo Viện', 'Leadership')}</div>
-              <div className="font-display text-sm font-semibold">{(leaders.data ?? []).slice(0, 1).map((l) => `${l.position}: ${l.fullName}`)[0] ?? t('Viện trưởng', 'Director')}</div>
+            <div className={cn(leadershipCard, 'max-w-3xl')}>
+              <div className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-gold">{t('Lãnh đạo Viện', 'Leadership')}</div>
+              <div className="mt-2 font-display text-[1.05rem] font-semibold leading-snug sm:text-[1.18rem]">
+                {director ? `${director.position}: ${director.fullName}` : t('Viện trưởng', 'Director')}
+              </div>
             </div>
-            <div className="h-6 w-px bg-navy" />
-            <div className="h-px w-3/4 bg-navy" />
+
+            {deputyDirectors.length > 0 && (
+              <div className="w-full max-w-3xl">
+                <div className="mx-auto h-7 w-px bg-navy" />
+                <div className="relative hidden h-7 sm:block">
+                  <div className="absolute left-1/4 right-1/4 top-0 h-px bg-navy" />
+                  <div className="absolute left-1/4 top-0 h-7 w-px bg-navy" />
+                  <div className="absolute right-1/4 top-0 h-7 w-px bg-navy" />
+                </div>
+                <div className="grid items-stretch gap-4 sm:grid-cols-2">
+                  {deputyDirectors.map((leader) => (
+                    <div key={leader.id} className={leadershipCard}>
+                      <div className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-gold">{leader.position}</div>
+                      <div className="mt-2 font-display text-[1.05rem] font-semibold leading-snug sm:text-[1.18rem]">{leader.fullName}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           {ORG_TYPES.map((g) => {
             const list = (units.data ?? []).filter((u) => u.type === g.type).sort((a, b) => a.sortOrder - b.sortOrder);
