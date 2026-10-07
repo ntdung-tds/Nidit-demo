@@ -8,6 +8,49 @@ import { runCrawlSource } from "./crawler";
 const TICK_MS = 30_000;
 let running = false;
 let timer: NodeJS.Timeout | null = null;
+let officialSourcesReady = false;
+
+const OFFICIAL_SOURCE_UPGRADES = [
+  {
+    legacyName: "Tuổi Trẻ – Nhịp sống số",
+    name: "Bộ Khoa học và Công nghệ – Chuyển đổi số",
+    url: "https://mst.gov.vn/rss/tin-tuc-su-kien/chuyen-doi-so.rss",
+    intervalMinutes: 60,
+    keywords: ["chuyển đổi số", "công nghệ số", "dữ liệu", "trí tuệ nhân tạo", "AI"],
+  },
+  {
+    legacyName: "Thanh Niên – Công nghệ",
+    name: "Công báo điện tử Chính phủ – Văn bản mới",
+    url: "https://congbao.chinhphu.vn/cac-van-ban-moi-ban-hanh.rss",
+    intervalMinutes: 120,
+    keywords: ["khoa học", "công nghệ", "chuyển đổi số", "dữ liệu", "trí tuệ nhân tạo"],
+  },
+] as const;
+
+/**
+ * Nâng cấp hai nguồn mẫu của bản demo sang nguồn chính thống.
+ * Chỉ thay đúng các nguồn mẫu cũ nên không ghi đè nguồn do quản trị viên tự cấu hình.
+ */
+async function ensureOfficialDemoSources(now: Date) {
+  let updated = 0;
+  for (const source of OFFICIAL_SOURCE_UPGRADES) {
+    const rows = await db
+      .update(crawlSourcesTable)
+      .set({
+        name: source.name,
+        url: source.url,
+        intervalMinutes: source.intervalMinutes,
+        keywords: [...source.keywords],
+        nextRunAt: now,
+        lastStatus: null,
+        lastMessage: null,
+      })
+      .where(eq(crawlSourcesTable.name, source.legacyName))
+      .returning({ id: crawlSourcesTable.id });
+    updated += rows.length;
+  }
+  if (updated) logger.info({ updated }, "Upgraded demo crawler sources to official RSS feeds");
+}
 
 /** Xuất bản các bài hẹn giờ đã đến giờ và gỡ các bài đã hết hạn hiển thị */
 async function publishAndUnpublish(now: Date) {
@@ -69,6 +112,14 @@ async function tick() {
   if (running) return;
   running = true;
   const now = new Date();
+  if (!officialSourcesReady) {
+    try {
+      await ensureOfficialDemoSources(now);
+      officialSourcesReady = true;
+    } catch (err) {
+      logger.error({ err }, "Scheduler official source upgrade failed");
+    }
+  }
   try {
     await publishAndUnpublish(now);
   } catch (err) {
