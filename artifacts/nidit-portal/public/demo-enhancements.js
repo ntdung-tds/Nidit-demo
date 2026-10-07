@@ -37,43 +37,58 @@
     const dialog = document.querySelector('[role="dialog"]');
     if (!dialog) return;
 
-    const oldLabels = new Set([
+    // Component gốc đang chèn link quản trị cả ở mục Liên hệ lồng trong Giới thiệu
+    // và ở mục Liên hệ cấp chính. Chỉ xóa chính link/nút quản trị, tuyệt đối không
+    // xóa <li> cha vì <li> đó còn chứa mục menu hợp lệ.
+    dialog.querySelectorAll('[data-testid="link-mobile-admin-inline"]').forEach((el) => el.remove());
+    Array.from(dialog.querySelectorAll('button')).forEach((el) => {
+      const label = lower(el);
+      if (label === 'đăng xuất quản trị' || label === 'sign out of admin') el.remove();
+    });
+
+    // Dọn các hàng được tạo bởi những bản demo-enhancements cũ.
+    dialog.querySelectorAll('[data-demo-account-row="1"]').forEach((el) => el.remove());
+
+    const legacyLabels = new Set([
       'quản trị viên demo', 'quản trị / crm', 'đăng nhập / quản trị crm', 'mở quản trị / crm',
-      'đăng xuất quản trị', 'đăng xuất', 'admin / crm', 'sign in / admin crm',
-      'open admin / crm', 'sign out of admin',
+      'admin / crm', 'sign in / admin crm', 'open admin / crm',
     ]);
     Array.from(dialog.querySelectorAll('a,button')).forEach((el) => {
       if (el.closest('[data-demo-login-row="1"]')) return;
-      if (!oldLabels.has(lower(el))) return;
-      const li = el.closest('li');
-      if (li) li.remove();
-      else el.remove();
+      if (legacyLabels.has(lower(el))) el.remove();
     });
-    Array.from(dialog.querySelectorAll('[data-demo-account-row="1"]')).forEach((el) => el.remove());
 
+    // Chỉ chọn mục Liên hệ cấp chính (nhãn chính xác "Liên hệ"), không chọn
+    // "Thông tin liên hệ, đầu mối" nằm trong nhóm Giới thiệu.
     const contact = Array.from(dialog.querySelectorAll('a')).find((a) => lower(a) === 'liên hệ');
     if (!contact) return;
     const contactLi = contact.closest('li');
     if (!contactLi || !contactLi.parentElement) return;
 
     let row = dialog.querySelector('[data-demo-login-row="1"]');
-    if (row) {
-      if (row.previousElementSibling !== contactLi) contactLi.insertAdjacentElement('afterend', row);
+    if (!row) {
+      row = document.createElement('li');
+      row.dataset.demoLoginRow = '1';
+      row.className = contactLi.className;
+      const login = document.createElement('a');
+      login.href = buildCrmHref(contact.getAttribute('href'));
+      login.className = contact.className;
+      login.textContent = 'Đăng nhập';
+      login.setAttribute('data-testid', 'link-mobile-login-after-contact');
+      row.appendChild(login);
+    } else {
       const existingLink = row.querySelector('a');
-      if (existingLink) existingLink.href = buildCrmHref(contact.getAttribute('href'));
-      return;
+      if (existingLink) {
+        existingLink.href = buildCrmHref(contact.getAttribute('href'));
+        existingLink.textContent = 'Đăng nhập';
+        existingLink.className = contact.className;
+      }
+      row.className = contactLi.className;
     }
 
-    row = document.createElement('li');
-    row.dataset.demoLoginRow = '1';
-    row.className = contactLi.className;
-    const login = document.createElement('a');
-    login.href = buildCrmHref(contact.getAttribute('href'));
-    login.className = contact.className;
-    login.textContent = 'Đăng nhập';
-    login.setAttribute('data-testid', 'link-mobile-login-after-contact');
-    row.appendChild(login);
-    contactLi.insertAdjacentElement('afterend', row);
+    // Luôn đặt đúng ngay sau Liên hệ cấp chính, không nằm trong nhóm Giới thiệu
+    // và cũng không rơi xuống vùng điều khiển/ngôn ngữ phía cuối menu.
+    if (row.previousElementSibling !== contactLi) contactLi.insertAdjacentElement('afterend', row);
   }
 
   function patchOrgLeadershipChart() {
