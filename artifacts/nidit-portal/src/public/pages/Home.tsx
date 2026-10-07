@@ -1,6 +1,6 @@
 import { EventCarousel } from '../EventCarousel';
 import { Link } from 'wouter';
-import { ArrowRight, CalendarDays, Database, Download, FileText, FlaskConical, Image as ImageIcon, MapPin, PlayCircle, ShieldCheck, BookOpen, Search, Landmark, ExternalLink } from 'lucide-react';
+import { ArrowRight, CalendarDays, Database, Download, FileText, FlaskConical, Image as ImageIcon, MapPin, PlayCircle, ShieldCheck, BookOpen, Search, Landmark, ExternalLink, Rss } from 'lucide-react';
 import {
   useGetHomeFeed, getGetHomeFeedQueryKey, useListFields, useListPublications, getListPublicationsQueryKey,
   useListPopularArticles, getListPopularArticlesQueryKey, useListEvaluationServices, useListMenuItems, getListMenuItemsQueryKey,
@@ -318,6 +318,14 @@ export default function HomePage() {
                 <li key={l.id}><SmartLink href={l.url} newTab={l.openInNewTab} className="flex items-center justify-between py-2 text-sm hover:text-seal">{label(l)}<ExternalLink className="h-3.5 w-3.5 opacity-50" /></SmartLink></li>
               ))}
             </ul>
+            <div className="mt-4 border-t border-rule pt-3">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.08em] text-ink"><Rss className="h-4 w-4 text-seal" />{t('Nguồn tin cập nhật tự động', 'Automatic official feeds')}</div>
+              <p className="mt-1.5 text-[11.5px] leading-relaxed text-muted-foreground">{t('RSS chính thống được thu thập định kỳ và đưa vào hàng chờ biên tập trước khi xuất bản.', 'Official RSS feeds are collected periodically and queued for editorial review before publication.')}</p>
+              <ul className="mt-2 divide-y divide-rule border-y border-rule">
+                <li><SmartLink href="https://mst.gov.vn/rss/tin-tuc-su-kien/chuyen-doi-so.rss" newTab className="flex items-center justify-between gap-3 py-2 text-[12.5px] font-medium hover:text-seal"><span>{t('Bộ KH&CN – Chuyển đổi số', 'Ministry of Science and Technology – Digital transformation')}</span><span className="num shrink-0 text-[10px] text-muted-foreground">RSS</span></SmartLink></li>
+                <li><SmartLink href="https://congbao.chinhphu.vn/cac-van-ban-moi-ban-hanh.rss" newTab className="flex items-center justify-between gap-3 py-2 text-[12.5px] font-medium hover:text-seal"><span>{t('Công báo điện tử Chính phủ – Văn bản mới', 'Government Gazette – New documents')}</span><span className="num shrink-0 text-[10px] text-muted-foreground">RSS</span></SmartLink></li>
+              </ul>
+            </div>
             {(services.data ?? []).length > 0 && (
               <div className="mt-4 border-t border-rule pt-3">
                 <div className="text-xs font-semibold text-muted-foreground">{t('Dịch vụ đánh giá – kiểm định', 'Testing services')}</div>
