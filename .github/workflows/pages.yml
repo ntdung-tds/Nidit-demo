@@ -39,6 +39,9 @@ jobs:
       - name: Check Pages API recovery
         run: pnpm run test:pages
 
+      - name: Build workspace type definitions
+        run: pnpm run typecheck:libs
+
       - name: Typecheck portal
         run: pnpm --filter @workspace/nidit-portal run typecheck
 
