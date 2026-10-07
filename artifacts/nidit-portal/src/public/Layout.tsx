@@ -8,8 +8,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { cn } from '@/lib/utils';
 import { asset, buildMenuTree, fmtNum, isArticlePath, usePortal, useTracker, type MenuNode } from './lib';
 import { SmartLink } from './ui';
-import { usePagesDataSource } from '@/pages-data-source';
-import { fmtDateTime } from './lib';
 
 function useMenu(location: 'main' | 'footer' | 'links') {
   const params = { location } as const;
@@ -31,28 +29,19 @@ function isActive(loc: string, url: string) {
 function DemoNotice() {
   const { data } = useGetSiteSettings();
   const { t } = usePortal();
-  const { source, capturedAt } = usePagesDataSource();
-  const [hidden, setHidden] = useState(() => sessionStorage.getItem('nidit_demo_hidden') === '1');
-  if (source === 'fallback') return (
-    <div className="no-print border-b border-gold/40 bg-[hsl(42_80%_92%)] text-[hsl(32_60%_22%)]" role="status">
-      <div className="container-portal flex flex-wrap items-center gap-3 py-2 text-xs">
-        <Info className="h-3.5 w-3.5 shrink-0" />
-        <p className="min-w-0 flex-1" data-testid="text-fallback-notice">
-          {t('Máy chủ cập nhật đang gián đoạn. Trang đang hiển thị nội dung dự phòng đã lưu lúc', 'The update server is unavailable. This page is showing fallback content saved at')} {fmtDateTime(capturedAt)}.
-        </p>
-        <button onClick={() => window.location.reload()} className="shrink-0 underline underline-offset-2" data-testid="button-reconnect">
-          {t('Thử kết nối lại', 'Reconnect')}
-        </button>
-      </div>
-    </div>
-  );
-  if (!data?.demoNotice || hidden) return null;
+  const [hidden, setHidden] = useState(() => sessionStorage.getItem('nidit_demo_notice_hidden_v2') === '1');
+  const notice = import.meta.env.VITE_GITHUB_PAGES === 'true'
+    ? t('Giao diện và nội dung minh họa phục vụ giới thiệu, góp ý; chưa phải trang thông tin điện tử chính thức.', 'Illustrative design and content for presentation and feedback; this is not the official website.')
+    : data?.demoNotice;
+  if (!notice || hidden) return null;
   return (
-    <div className="no-print border-b border-gold/40 bg-[hsl(42_80%_92%)] text-[hsl(32_60%_22%)]" role="note">
-      <div className="container-portal flex items-center gap-3 py-1.5 text-xs">
-        <Info className="h-3.5 w-3.5 shrink-0" />
-        <p className="flex-1" data-testid="text-demo-notice">{data.demoNotice}</p>
-        <button onClick={() => { sessionStorage.setItem('nidit_demo_hidden', '1'); setHidden(true); }} aria-label={t('Ẩn thông báo', 'Dismiss')} className="p-1 hover:opacity-70" data-testid="button-dismiss-demo">
+    <div className="no-print border-b border-navy/10 bg-secondary/70 text-navy" role="note">
+      <div className="container-portal flex items-start gap-2.5 py-2 text-[0.68rem] leading-relaxed sm:items-center sm:text-xs">
+        <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 sm:mt-0" aria-hidden />
+        <p className="min-w-0 flex-1" data-testid="text-demo-notice">
+          <strong className="mr-2 font-bold uppercase tracking-wide">{t('Bản demo', 'Demo')}</strong>{notice}
+        </p>
+        <button onClick={() => { sessionStorage.setItem('nidit_demo_notice_hidden_v2', '1'); setHidden(true); }} aria-label={t('Ẩn thông báo', 'Dismiss')} className="-my-1 -mr-1 grid h-7 w-7 shrink-0 place-items-center hover:bg-navy/5" data-testid="button-dismiss-demo">
           <X className="h-3.5 w-3.5" />
         </button>
       </div>
@@ -124,24 +113,28 @@ function Masthead() {
   const { lang, t } = usePortal();
   const name = s?.siteName ?? 'Viện Công nghệ số và Chuyển đổi số quốc gia';
   const nameEn = s?.siteNameEn ?? 'National Institute of Digital Technology and Digital Transformation';
+  const title = lang === 'en' ? nameEn : name;
+  const titleParts = lang === 'vi'
+    ? title.match(/^(Viện Công nghệ số)\s+(và Chuyển đổi số quốc gia)$/i)?.slice(1)
+    : title.match(/^(National Institute of Digital Technology)\s+(and Digital Transformation)$/i)?.slice(1);
   return (
-    <div className="paper-grain border-b border-rule bg-paper">
-      <div className="container-portal flex items-center justify-between gap-6 py-4 md:py-5">
-        <Link href="/" className="flex min-w-0 items-center gap-3 md:gap-4" data-testid="link-home-logo">
-          <img src={asset('logo-nidit.svg')} alt={t('Logo NIDIT (tạm thời)', 'NIDIT logo (temporary)')} className="h-12 w-12 shrink-0 md:h-[4.25rem] md:w-[4.25rem]" />
+    <div className="border-b border-rule bg-paper" data-testid="site-masthead">
+      <div className="container-portal flex items-center justify-between gap-8 py-4 md:py-5">
+        <Link href="/" className="flex min-w-0 items-center gap-3 sm:gap-4 md:gap-5" data-testid="link-home-logo">
+          <img src={asset('logo-nidit.svg')} alt={t('Logo NIDIT (tạm thời)', 'NIDIT logo (temporary)')} className="h-14 w-14 shrink-0 sm:h-16 sm:w-16 md:h-20 md:w-20" />
           <div className="min-w-0">
-            <div className="text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-seal md:text-[0.7rem]">
+            <div className="mb-1 text-[0.6rem] font-semibold uppercase leading-relaxed tracking-[0.09em] text-seal sm:text-[0.7rem] md:mb-1.5 md:text-[0.75rem]">
               {lang === 'en' ? (s?.parentOrgEn ?? 'Ministry of Science and Technology') : (s?.parentOrg ?? 'Bộ Khoa học và Công nghệ')}
             </div>
-            <div className="font-display text-[1rem] font-bold uppercase leading-tight text-navy sm:text-[1.2rem] md:text-[1.55rem]" data-testid="text-site-name">
-              {lang === 'en' ? nameEn : name}
+            <div className="font-display text-[1rem] font-bold uppercase leading-[1.24] text-navy sm:text-[1.3rem] md:text-[1.55rem]" data-testid="text-site-name">
+              {titleParts ? titleParts.map((part, index) => <span key={part} className="block">{index > 0 && <span className="sr-only"> </span>}{part}</span>) : title}
             </div>
-            <div className="mt-0.5 hidden truncate text-[0.72rem] uppercase tracking-[0.06em] text-muted-foreground sm:block md:text-[0.78rem]">
+            <div className="mt-1.5 hidden text-[0.65rem] uppercase leading-relaxed tracking-[0.025em] text-muted-foreground sm:block md:text-[0.69rem]">
               {lang === 'en' ? name : nameEn}
             </div>
           </div>
         </Link>
-        <SearchBox className="hidden w-[320px] shrink-0 lg:flex" />
+        <SearchBox className="hidden w-[280px] shrink-0 xl:flex" />
       </div>
     </div>
   );
@@ -152,7 +145,7 @@ function DesktopNav({ tree }: { tree: MenuNode[] }) {
   const label = useMenuLabel();
   const { t } = usePortal();
   return (
-    <ul className="hidden h-11 items-stretch lg:flex">
+    <ul className="hidden h-11 items-stretch xl:flex">
       <li className="flex">
         <Link href="/" className={cn('grid w-11 place-items-center hover:bg-white/10', loc === '/' && 'bg-seal')} aria-label={t('Trang chủ', 'Home')} data-testid="link-nav-home"><Home className="h-4 w-4" /></Link>
       </li>
@@ -188,7 +181,7 @@ function MobileNav({ tree }: { tree: MenuNode[] }) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <button className="grid h-11 w-11 place-items-center hover:bg-white/10 lg:hidden" aria-label={t('Mở menu', 'Open menu')} data-testid="button-mobile-menu"><Menu className="h-5 w-5" /></button>
+        <button className="grid h-11 w-11 place-items-center hover:bg-white/10 xl:hidden" aria-label={t('Mở menu', 'Open menu')} data-testid="button-mobile-menu"><Menu className="h-5 w-5" /></button>
       </SheetTrigger>
       <SheetContent side="left" className="w-[88vw] max-w-sm overflow-y-auto bg-paper p-0">
         <SheetHeader className="border-b border-rule bg-navy p-4 text-left">
@@ -234,7 +227,7 @@ function Header() {
         <div className="container-portal flex items-center justify-between">
           <MobileNav tree={tree} />
           <DesktopNav tree={tree} />
-          <Link href="/tim-kiem" className="grid h-11 w-11 place-items-center hover:bg-white/10 lg:hidden" aria-label={t('Tìm kiếm', 'Search')}><Search className="h-4 w-4" /></Link>
+          <Link href="/tim-kiem" className="grid h-11 w-11 place-items-center hover:bg-white/10 xl:hidden" aria-label={t('Tìm kiếm', 'Search')}><Search className="h-4 w-4" /></Link>
         </div>
       </nav>
     </header>

@@ -2,7 +2,9 @@
 
 The Pages frontend reads current public content from `VITE_API_BASE_URL`. If that API is unreachable, returns a stopped-app HTML page, fails with a server error, or takes more than five seconds, supported public reads use `src/pages-snapshot.json`. Both live responses and the fallback rewrite local image, file and video paths below `/Nidit-demo/`.
 
-A visible notice identifies fallback content and its capture time. Active queries retry the API every minute and on window focus; successful responses replace the fallback. The Reconnect button reloads the page for an immediate retry. A fallback is a saved copy, not current database content.
+The public notice identifies the site as a demo with illustrative content. API failover runs in the background: active queries retry every minute and on window focus, and successful responses replace the fallback. A fallback is a saved copy, not current database content.
+
+The masthead wraps the institute name into two deliberate lines. The lead area presents up to four published event/conference stories, with swipe navigation, previous/next controls and a pause button. Slides advance every seven seconds; hovering, manual navigation and reduced-motion preferences pause automatic playback.
 
 ## API hosting
 

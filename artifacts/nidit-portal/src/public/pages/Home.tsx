@@ -1,33 +1,18 @@
-import { usePagesDataSource } from '@/pages-data-source';
+import { EventCarousel } from '../EventCarousel';
 import { Link } from 'wouter';
 import { ArrowRight, CalendarDays, Database, Download, FileText, FlaskConical, Image as ImageIcon, MapPin, PlayCircle, ShieldCheck, BookOpen, Search, Landmark, ExternalLink } from 'lucide-react';
 import {
   useGetHomeFeed, getGetHomeFeedQueryKey, useListFields, useListPublications, getListPublicationsQueryKey,
   useListPopularArticles, getListPopularArticlesQueryKey, useListEvaluationServices, useListMenuItems, getListMenuItemsQueryKey,
-  type ArticleSummary,
 } from '@workspace/api-client-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ACCESS_LABEL, PROJECT_STATUS_LABEL, PUB_TYPE_LABEL, buildMenuTree, fmtDate, fmtDateTime, fmtNum, usePortal, useSeo } from '../lib';
 import { ArticleCard, ArticleMeta, ErrorState, FieldIcon, Img, SectionHead, SmartLink, Tag } from '../ui';
 import { useMenuLabel } from '../Layout';
 
-function Lead({ a }: { a: ArticleSummary }) {
-  return (
-    <article className="group fade-up" data-testid={`card-featured-${a.id}`}>
-      <Link href={`/tin-tuc/${a.slug}`} tabIndex={-1} aria-hidden><Img src={a.coverImage} alt={a.title} ratio="aspect-[16/9.5]" label={a.categoryName ?? undefined} /></Link>
-      {a.categoryName && <div className="kicker mt-4">{a.categoryName}</div>}
-      <h2 className="mt-1.5 font-display text-[1.55rem] font-bold leading-[1.22] text-ink md:text-[1.95rem]">
-        <Link href={`/tin-tuc/${a.slug}`} className="headline-link">{a.title}</Link>
-      </h2>
-      <p className="mt-2.5 line-clamp-3 text-[0.98rem] leading-relaxed text-foreground/80">{a.summary}</p>
-      <ArticleMeta a={a} className="mt-3" />
-    </article>
-  );
-}
-
 function HomeSkeleton() {
   return (
-    <div className="container-portal grid gap-6 py-6 lg:grid-cols-[250px_1fr_280px]">
+    <div className="container-portal grid gap-6 py-6 lg:grid-cols-[250px_minmax(0,1fr)_280px]">
       <div className="space-y-4">{Array.from({ length: 6 }).map((_, i) => <div key={i} className="space-y-1.5"><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-3/4" /><Skeleton className="h-3 w-16" /></div>)}</div>
       <div className="space-y-3"><Skeleton className="aspect-[16/9.5] w-full rounded-none" /><Skeleton className="h-8 w-5/6" /><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-2/3" /></div>
       <div className="space-y-4">{Array.from({ length: 5 }).map((_, i) => <div key={i} className="flex gap-3"><Skeleton className="h-16 w-24 rounded-none" /><div className="flex-1 space-y-1.5"><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-2/3" /></div></div>)}</div>
@@ -36,7 +21,6 @@ function HomeSkeleton() {
 }
 
 export default function HomePage() {
-  const { source } = usePagesDataSource();
   const { lang, t } = usePortal();
   const label = useMenuLabel();
   useSeo(null, null);
@@ -54,7 +38,9 @@ export default function HomePage() {
   if (feed.isLoading) return <HomeSkeleton />;
   if (feed.isError || !feed.data) return <div className="container-portal py-16"><ErrorState onRetry={() => feed.refetch()} /></div>;
   const f = feed.data;
-  const lead = f.featured[0] ?? f.latest[0];
+  const events = f.sections.find((section) => section.categorySlug === 'su-kien-hoi-thao')?.articles ?? [];
+  const slides = (events.length ? events : f.featured.length ? f.featured : f.latest).slice(0, 4);
+  const lead = slides[0];
   const sideFeatured = f.featured.slice(1, 6);
   const latest = f.latest.filter((a) => a.id !== lead?.id).slice(0, 8);
   const mostRead = f.mostRead.length ? f.mostRead : popular.data ?? [];
@@ -72,7 +58,7 @@ export default function HomePage() {
     <div>
       {/* ===== Front page: three-column newsroom grid ===== */}
       <section className="container-portal pt-6" aria-label={t('Tin nổi bật', 'Top stories')}>
-        <div className="grid gap-x-7 gap-y-8 lg:grid-cols-[250px_1fr_280px]">
+        <div className="grid gap-x-7 gap-y-8 lg:grid-cols-[250px_minmax(0,1fr)_280px]">
           {/* latest */}
           <div className="order-2 lg:order-1 lg:border-r lg:border-rule lg:pr-6">
             <SectionHead title={t('Tin mới nhất', 'Latest')} href="/tin-tuc" />
@@ -86,7 +72,7 @@ export default function HomePage() {
             </ol>
           </div>
           {/* lead */}
-          <div className="order-1 lg:order-2">{lead && <Lead a={lead} />}</div>
+          <div className="order-1 min-w-0 lg:order-2">{slides.length > 0 && <EventCarousel key={`${lang}-${slides.map((a) => a.id).join('-')}`} articles={slides} isEvents={events.length > 0} />}</div>
           {/* featured column */}
           <div className="order-3 lg:border-l lg:border-rule lg:pl-6">
             <SectionHead title={t('Tiêu điểm', 'In focus')} />
@@ -346,7 +332,7 @@ export default function HomePage() {
 
       <div className="container-portal mt-8 flex items-center gap-2 text-xs text-muted-foreground">
         <CalendarDays className="h-3.5 w-3.5" />
-        {source === 'fallback' ? t('Dữ liệu dự phòng', 'Fallback data') : source === 'snapshot' ? t('Dữ liệu mẫu tĩnh', 'Static sample data') : t('Cập nhật liên tục', 'Continuously updated')}
+        {import.meta.env.VITE_GITHUB_PAGES === 'true' ? t('Nội dung minh họa', 'Demo content') : t('Cập nhật liên tục', 'Continuously updated')}
         · <Download className="h-3.5 w-3.5" /><a href={import.meta.env.VITE_GITHUB_PAGES === 'true' ? `${import.meta.env.BASE_URL}rss.xml` : `${import.meta.env.BASE_URL}api/rss.xml`} className="hover:text-seal">RSS</a>
       </div>
     </div>
