@@ -1,5 +1,6 @@
-/* NIDIT CMS — "Bàn biên tập" theme. Applied by AdminApp via html.adm-theme so portals (dialogs, toasts) inherit it. */
-html.adm-theme {
+/* NIDIT CMS — "Bàn biên tập" theme. Applied by AdminApp via html.adm-theme and directly on .adm-root for the GitHub Pages demo. */
+html.adm-theme,
+.adm-root {
   --background: 40 24% 96%;
   --foreground: 222 32% 13%;
   --border: 36 14% 85%;
@@ -45,7 +46,32 @@ html.adm-theme {
   --shadow-xl: 0 20px 40px -12px hsl(222 30% 20% / 0.22);
 }
 
-.adm-root { font-family: var(--app-font-sans); font-size: 14px; }
+html.adm-theme,
+html.adm-theme body,
+html.adm-theme #root {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.adm-root {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+  font-family: var(--app-font-sans);
+  font-size: 14px;
+  -webkit-text-size-adjust: 100%;
+}
+.adm-root main,
+.adm-root header,
+.adm-root section,
+.adm-root article,
+.adm-root form,
+.adm-root nav { min-width: 0; }
+.adm-root img,
+.adm-root video { max-width: 100%; height: auto; }
 .adm-serif { font-family: var(--app-font-serif); letter-spacing: -0.01em; }
 .adm-mono { font-family: var(--app-font-mono); font-feature-settings: 'zero' 1; }
 .adm-num { font-variant-numeric: tabular-nums; }
@@ -90,8 +116,53 @@ html.adm-theme {
 .adm-editor .ProseMirror img { border-radius: 4px; max-width: 100%; }
 .adm-editor .ProseMirror a { color: hsl(var(--primary)); text-decoration: underline; }
 
+/* Controlled horizontal scrolling for data grids on tablets/phones. */
+.adm-root .overflow-x-auto {
+  max-width: 100%;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(222 20% 30% / 0.35) transparent;
+}
+.adm-root .overflow-x-auto::-webkit-scrollbar { height: 7px; }
+.adm-root .overflow-x-auto::-webkit-scrollbar-thumb { background: hsl(222 20% 30% / 0.28); border-radius: 8px; }
+.adm-root .overflow-x-auto > table { max-width: none; }
+
+.adm-scroll { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 .adm-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
 .adm-scroll::-webkit-scrollbar-thumb { background: hsl(222 20% 30% / 0.35); border-radius: 8px; }
+
+@media (max-width: 767px) {
+  .adm-root { font-size: 13.5px; }
+  .adm-root main { width: 100%; max-width: 100%; padding-left: 12px !important; padding-right: 12px !important; padding-top: 16px !important; padding-bottom: max(28px, env(safe-area-inset-bottom)) !important; }
+  .adm-root h1 { font-size: clamp(1.35rem, 6.3vw, 1.7rem) !important; line-height: 1.16; }
+  .adm-root h2 { line-height: 1.2; }
+
+  /* 16px avoids browser auto-zoom when focusing fields on mobile. */
+  .adm-root input:not([type='checkbox']):not([type='radio']),
+  .adm-root select,
+  .adm-root textarea { font-size: 16px !important; }
+
+  /* Touch targets in the working area; sidebar/header icons keep their compact sizing. */
+  .adm-root main button,
+  .adm-root main a[role='button'] { min-height: 40px; }
+
+  .adm-root .adm-editor .ProseMirror { min-height: 260px; padding: 14px 12px; }
+  .adm-root .overflow-x-auto { margin-left: -1px; margin-right: -1px; padding-bottom: 3px; }
+  .adm-root .overflow-x-auto table { font-size: 11.5px; }
+  .adm-root .overflow-x-auto th,
+  .adm-root .overflow-x-auto td { padding-left: 10px !important; padding-right: 10px !important; }
+
+  /* Prevent long IDs, URLs and metadata from widening cards/forms. */
+  .adm-root p,
+  .adm-root dd,
+  .adm-root [class*='text-muted-foreground'] { overflow-wrap: anywhere; }
+}
+
+@media (max-width: 420px) {
+  .adm-root main { padding-left: 10px !important; padding-right: 10px !important; }
+  .adm-root .st { font-size: 10.5px; }
+}
 
 @keyframes adm-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .adm-rise { animation: adm-rise 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
