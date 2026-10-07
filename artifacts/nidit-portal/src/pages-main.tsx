@@ -14,7 +14,7 @@ import { setPagesDataSource } from './pages-data-source';
 
 import './index.css';
 
-const AdminApp = lazy(() => import('@/admin/AdminApp'));
+const PagesDemoApp = lazy(() => import('@/admin/PagesDemoApp'));
 const remoteApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
 
 setAuthTokenGetter(() => getAdminToken());
@@ -47,7 +47,7 @@ function PagesRoot() {
   if (isAdminPath(location)) {
     return (
       <Suspense fallback={<div className="min-h-screen bg-background" />}>
-        <AdminApp />
+        <PagesDemoApp />
       </Suspense>
     );
   }
