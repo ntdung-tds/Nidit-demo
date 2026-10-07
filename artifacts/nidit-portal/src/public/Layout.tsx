@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { cn } from '@/lib/utils';
 import { asset, buildMenuTree, fmtNum, isArticlePath, usePortal, useTracker, type MenuNode } from './lib';
 import { SmartLink } from './ui';
+import { ExternalNewsDemo } from './ExternalNewsDemo';
 
 function useMenu(location: 'main' | 'footer' | 'links') {
   const params = { location } as const;
@@ -82,6 +83,7 @@ function TopBar() {
             ))}
           </div>
           <Link href="/rss" className="hidden items-center gap-1 hover:text-white md:flex" data-testid="link-rss-top"><Rss className="h-3 w-3" />RSS</Link>
+          <Link href="/quan-tri" className="hidden items-center gap-1 border-l border-white/20 pl-3 font-semibold text-white/80 hover:text-white md:flex" data-testid="link-admin-top"><Users className="h-3 w-3" />{t('Quản trị / CRM', 'Admin / CRM')}</Link>
         </div>
       </div>
     </div>
@@ -114,22 +116,19 @@ function Masthead() {
   const name = s?.siteName ?? 'Viện Công nghệ số và Chuyển đổi số quốc gia';
   const nameEn = s?.siteNameEn ?? 'National Institute of Digital Technology and Digital Transformation';
   const title = lang === 'en' ? nameEn : name;
-  const titleParts = lang === 'vi'
-    ? title.match(/^(Viện Công nghệ số)\s+(và Chuyển đổi số quốc gia)$/i)?.slice(1)
-    : title.match(/^(National Institute of Digital Technology)\s+(and Digital Transformation)$/i)?.slice(1);
   return (
     <div className="border-b border-rule bg-paper" data-testid="site-masthead">
-      <div className="container-portal flex items-center justify-between gap-8 py-4 md:py-5">
-        <Link href="/" className="flex min-w-0 items-center gap-3 sm:gap-4 md:gap-5" data-testid="link-home-logo">
+      <div className="container-portal flex items-center justify-between gap-6 py-4 md:py-5">
+        <Link href="/" className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4 md:gap-5" data-testid="link-home-logo">
           <img src={asset('logo-nidit.svg')} alt={t('Logo NIDIT (tạm thời)', 'NIDIT logo (temporary)')} className="h-14 w-14 shrink-0 sm:h-16 sm:w-16 md:h-20 md:w-20" />
           <div className="min-w-0">
             <div className="mb-1 text-[0.6rem] font-semibold uppercase leading-relaxed tracking-[0.09em] text-seal sm:text-[0.7rem] md:mb-1.5 md:text-[0.75rem]">
               {lang === 'en' ? (s?.parentOrgEn ?? 'Ministry of Science and Technology') : (s?.parentOrg ?? 'Bộ Khoa học và Công nghệ')}
             </div>
-            <div className="font-display text-[1rem] font-bold uppercase leading-[1.24] text-navy sm:text-[1.3rem] md:text-[1.55rem]" data-testid="text-site-name">
-              {titleParts ? titleParts.map((part, index) => <span key={part} className="block">{index > 0 && <span className="sr-only"> </span>}{part}</span>) : title}
+            <div className="font-display text-[0.95rem] font-bold uppercase leading-[1.18] text-navy sm:text-[1.15rem] md:text-[1.28rem] lg:whitespace-nowrap lg:text-[1.38rem] xl:text-[1.48rem] 2xl:text-[1.58rem]" data-testid="text-site-name">
+              {title}
             </div>
-            <div className="mt-1.5 hidden text-[0.65rem] uppercase leading-relaxed tracking-[0.025em] text-muted-foreground sm:block md:text-[0.69rem]">
+            <div className="mt-1.5 hidden text-[0.65rem] uppercase leading-relaxed tracking-[0.025em] text-muted-foreground sm:block md:text-[0.69rem] lg:whitespace-nowrap">
               {lang === 'en' ? name : nameEn}
             </div>
           </div>
@@ -312,7 +311,7 @@ function Footer() {
             ))}
             <li><Link href="/so-do-trang" className="inline-flex items-center gap-1 hover:text-white" data-testid="link-sitemap"><Network className="h-3 w-3" />{t('Sơ đồ trang', 'Sitemap')}</Link></li>
             <li><Link href="/rss" className="inline-flex items-center gap-1 hover:text-white" data-testid="link-rss"><Rss className="h-3 w-3" />RSS</Link></li>
-            {import.meta.env.VITE_GITHUB_PAGES !== 'true' && <li><Link href="/quan-tri" className="inline-flex items-center gap-1 text-white/35 hover:text-white" data-testid="link-admin"><Users className="h-3 w-3" />{t('Quản trị', 'Admin')}</Link></li>}
+            <li><Link href="/quan-tri" className="inline-flex items-center gap-1 hover:text-white" data-testid="link-admin"><Users className="h-3 w-3" />{t('Quản trị / CRM', 'Admin / CRM')}</Link></li>
           </ul>
         </div>
       </div>
@@ -332,12 +331,16 @@ function RouteTracker() {
 }
 
 export function PortalLayout({ children }: { children: ReactNode }) {
+  const [loc] = useLocation();
   return (
     <div className="flex min-h-[100dvh] flex-col">
       <RouteTracker />
       <DemoNotice />
       <Header />
-      <main id="main" className="flex-1">{children}</main>
+      <main id="main" className="flex-1">
+        {children}
+        {loc === '/' && <ExternalNewsDemo />}
+      </main>
       <Footer />
     </div>
   );
