@@ -174,7 +174,7 @@ function DesktopNav({ tree }: { tree: MenuNode[] }) {
   const label = useMenuLabel();
   const { t } = usePortal();
   return (
-    <ul className="hidden h-11 items-stretch xl:flex">
+    <ul className="hidden h-11 flex-nowrap items-stretch whitespace-nowrap xl:flex">
       <li className="flex">
         <Link href="/" className={cn('grid w-11 place-items-center hover:bg-white/10', loc === '/' && 'bg-seal')} aria-label={t('Trang chủ', 'Home')} data-testid="link-nav-home"><Home className="h-4 w-4" /></Link>
       </li>
@@ -195,6 +195,12 @@ function DesktopNav({ tree }: { tree: MenuNode[] }) {
                 </li>
               ))}
             </ul>
+          )}
+          {n.url === '/lien-he' && (
+            <Link href="/quan-tri" data-testid="link-desktop-login"
+              className="flex shrink-0 items-center whitespace-nowrap border-l border-white/15 px-3.5 text-[0.8rem] font-semibold uppercase tracking-[0.03em] hover:bg-white/10">
+              {t('Đăng nhập', 'Sign in')}
+            </Link>
           )}
         </li>
       ))}
