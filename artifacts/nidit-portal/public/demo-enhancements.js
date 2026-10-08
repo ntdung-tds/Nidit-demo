@@ -5,7 +5,6 @@
   const text = (el) => (el?.textContent || '').replace(/\s+/g, ' ').trim();
   const lower = (el) => text(el).toLocaleLowerCase('vi-VN');
   const isMobile = () => window.matchMedia('(max-width: 639px)').matches;
-  const isDesktopNav = () => window.matchMedia('(min-width: 1280px)').matches;
 
   function patchMobileMasthead() {
     if (!isMobile()) return;
@@ -32,51 +31,6 @@
     if (!contactHref) return CRM_PATH;
     if (contactHref.includes('#/')) return contactHref.replace(/#\/[^?#]*/, CRM_PATH);
     return CRM_PATH;
-  }
-
-  function patchDesktopLogin() {
-    const existing = document.querySelector('[data-demo-desktop-login="1"]');
-    if (!isDesktopNav()) {
-      existing?.closest('[data-demo-desktop-login-row]')?.remove();
-      return;
-    }
-    if (existing) return;
-
-    const homeLink = document.querySelector('[data-testid="link-nav-home"]');
-    const navList = homeLink?.closest('ul');
-    const navContainer = navList?.parentElement;
-    if (!navList || !navContainer) return;
-
-    const login = document.createElement('a');
-    login.dataset.demoDesktopLogin = '1';
-    login.href = CRM_PATH;
-    login.textContent = 'Đăng nhập';
-    login.setAttribute('data-testid', 'link-desktop-login');
-    login.style.height = '44px';
-    login.style.display = 'inline-flex';
-    login.style.alignItems = 'center';
-    login.style.justifyContent = 'center';
-    login.style.flexShrink = '0';
-    login.style.padding = '0 14px';
-    login.style.marginLeft = '0';
-    login.style.fontSize = '0.8rem';
-    login.style.fontWeight = '700';
-    login.style.textTransform = 'uppercase';
-    login.style.letterSpacing = '0.03em';
-    login.style.color = '#fff';
-    login.style.textDecoration = 'none';
-    login.style.borderLeft = '1px solid rgba(255,255,255,.16)';
-    login.addEventListener('mouseenter', () => { login.style.background = 'rgba(255,255,255,.1)'; });
-    login.addEventListener('mouseleave', () => { login.style.background = ''; });
-    const row = document.createElement('li');
-    row.dataset.demoDesktopLoginRow = '1';
-    row.style.display = 'flex';
-    row.appendChild(login);
-    const contact = Array.from(navList.children).find((item) =>
-      Array.from(item.querySelectorAll(':scope > a')).some((link) =>
-        link.getAttribute('href')?.endsWith('/lien-he')));
-    if (contact) contact.insertAdjacentElement('afterend', row);
-    else navList.appendChild(row);
   }
 
   function patchMobileLoginRow() {
@@ -213,7 +167,6 @@
 
   function patchAll() {
     patchMobileMasthead();
-    patchDesktopLogin();
     patchMobileLoginRow();
     patchOrgLeadershipChart();
     patchContactForm();
