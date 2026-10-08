@@ -38,7 +38,7 @@
   function patchDesktopLogin() {
     const existing = document.querySelector('[data-demo-desktop-login="1"]');
     if (!isDesktopNav()) {
-      existing?.remove();
+      existing?.closest('[data-demo-desktop-login-row]')?.remove();
       return;
     }
     if (existing) return;
@@ -59,7 +59,7 @@
     login.style.justifyContent = 'center';
     login.style.flexShrink = '0';
     login.style.padding = '0 14px';
-    login.style.marginLeft = 'auto';
+    login.style.marginLeft = '0';
     login.style.fontSize = '0.8rem';
     login.style.fontWeight = '700';
     login.style.textTransform = 'uppercase';
@@ -69,7 +69,15 @@
     login.style.borderLeft = '1px solid rgba(255,255,255,.16)';
     login.addEventListener('mouseenter', () => { login.style.background = 'rgba(255,255,255,.1)'; });
     login.addEventListener('mouseleave', () => { login.style.background = ''; });
-    navContainer.appendChild(login);
+    const row = document.createElement('li');
+    row.dataset.demoDesktopLoginRow = '1';
+    row.style.display = 'flex';
+    row.appendChild(login);
+    const contact = Array.from(navList.children).find((item) =>
+      Array.from(item.querySelectorAll(':scope > a')).some((link) =>
+        link.getAttribute('href')?.endsWith('/lien-he')));
+    if (contact) contact.insertAdjacentElement('afterend', row);
+    else navList.appendChild(row);
   }
 
   function patchMobileLoginRow() {
