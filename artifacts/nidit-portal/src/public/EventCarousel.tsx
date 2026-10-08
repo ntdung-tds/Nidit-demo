@@ -45,10 +45,11 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
     };
   }, [api]);
 
-  // On desktop the middle Events & Conferences carousel is the height reference.
-  // Both side columns use the same total height. Their headings stay fixed while
-  // only the article lists below them scroll, so the scrollbar uses the entire
-  // remaining height instead of producing a short scroll box with blank space.
+  // On desktop the whole middle column (the wrapper that contains the
+  // Events & Conferences carousel) is the height reference. Measuring the
+  // wrapper rather than only the inner <section> also includes any layout
+  // height contributed by the column itself, so the lower edges of all three
+  // top-news columns line up exactly.
   useEffect(() => {
     const section = sectionRef.current;
     const middle = section?.parentElement as HTMLElement | null;
@@ -117,14 +118,15 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
           return;
         }
 
-        // Let the middle carousel define the row height naturally.
+        // Let the middle column return to its natural height before measuring.
+        // The two side columns must not be allowed to stretch the grid row.
         grid.style.alignItems = 'start';
         middle.style.height = '';
         resetSide(left);
         resetSide(right);
 
         frame = window.requestAnimationFrame(() => {
-          const height = Math.ceil(section.getBoundingClientRect().height);
+          const height = Math.ceil(middle.getBoundingClientRect().height);
           if (height <= 0) return;
           applySide(left, height);
           applySide(right, height);
@@ -133,7 +135,7 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
     };
 
     const observer = new ResizeObserver(sync);
-    observer.observe(section);
+    observer.observe(middle);
     desktop.addEventListener('change', sync);
     window.addEventListener('resize', sync);
     sync();
