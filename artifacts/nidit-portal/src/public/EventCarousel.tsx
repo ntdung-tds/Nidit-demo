@@ -45,50 +45,6 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
     };
   }, [api]);
 
-  // Match only the carousel to Latest; In focus keeps its natural content height.
-  useEffect(() => {
-    const section = sectionRef.current;
-    const middle = section?.parentElement;
-    const left = middle?.parentElement?.children.item(0);
-    if (!section || !middle || !left) return;
-    const desktop = window.matchMedia('(min-width: 1024px)');
-    let frame = 0;
-    const clear = () => {
-      middle.style.minHeight = '';
-      section.style.minHeight = '';
-      section.style.display = '';
-      section.style.flexDirection = '';
-      const viewport = section.children.item(1) as HTMLElement | null;
-      if (viewport) viewport.style.flex = '';
-    };
-    const sync = () => {
-      window.cancelAnimationFrame(frame);
-      frame = window.requestAnimationFrame(() => {
-        clear();
-        if (!desktop.matches) return;
-        const height = Math.ceil(left.getBoundingClientRect().height);
-        middle.style.minHeight = `${height}px`;
-        section.style.minHeight = `${height}px`;
-        section.style.display = 'flex';
-        section.style.flexDirection = 'column';
-        const viewport = section.children.item(1) as HTMLElement | null;
-        if (viewport) viewport.style.flex = '1 0 auto';
-      });
-    };
-    const observer = new ResizeObserver(sync);
-    observer.observe(left);
-    desktop.addEventListener('change', sync);
-    window.addEventListener('resize', sync);
-    sync();
-    return () => {
-      window.cancelAnimationFrame(frame);
-      observer.disconnect();
-      desktop.removeEventListener('change', sync);
-      window.removeEventListener('resize', sync);
-      clear();
-    };
-  }, [articles.length]);
-
   // Use a one-shot timeout instead of a permanent interval. Every real slide
   // change (including a manual swipe/click) resets the 7-second countdown.
   // Vertical page scrolling on touch devices therefore never pauses autoplay.
