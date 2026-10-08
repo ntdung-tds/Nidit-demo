@@ -80,7 +80,7 @@ export default function HomePage() {
         .filter((a) => a.id !== lead?.id)
         .map((a) => [a.id, a]),
     ).values(),
-  ).slice(0, 6);
+  ).slice(0, 7);
   const latest = f.latest.filter((a) => a.id !== lead?.id).slice(0, 8);
   const mostRead = f.mostRead.length ? f.mostRead : popular.data ?? [];
 
