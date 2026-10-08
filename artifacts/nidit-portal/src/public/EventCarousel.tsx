@@ -45,9 +45,10 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
     };
   }, [api]);
 
-  // On desktop the whole middle column (Events & Conferences) is the base
-  // reference. The two side columns intentionally extend by approximately one
-  // article row so their scroll areas feel less cramped than the carousel.
+  // Desktop: only the left "Tin mới nhất" column is constrained and scrollable.
+  // The right "Tiêu điểm" column is intentionally left completely natural —
+  // no fixed height, max-height or overflow — so all six focus stories can be
+  // displayed without an internal scrollbar.
   useEffect(() => {
     const section = sectionRef.current;
     const middle = section?.parentElement as HTMLElement | null;
@@ -59,7 +60,7 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
     const desktop = window.matchMedia('(min-width: 1024px)');
     let frame = 0;
 
-    const resetSide = (element: HTMLElement) => {
+    const resetColumn = (element: HTMLElement) => {
       element.style.height = '';
       element.style.maxHeight = '';
       element.style.display = '';
@@ -80,16 +81,16 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
       }
     };
 
-    const applySide = (element: HTMLElement, height: number) => {
-      element.style.height = `${height}px`;
-      element.style.maxHeight = `${height}px`;
-      element.style.display = 'flex';
-      element.style.flexDirection = 'column';
-      element.style.overflow = 'hidden';
-      element.style.minHeight = '0';
+    const applyLeftScroll = (height: number) => {
+      left.style.height = `${height}px`;
+      left.style.maxHeight = `${height}px`;
+      left.style.display = 'flex';
+      left.style.flexDirection = 'column';
+      left.style.overflow = 'hidden';
+      left.style.minHeight = '0';
 
-      const heading = element.children.item(0) as HTMLElement | null;
-      const list = element.children.item(1) as HTMLElement | null;
+      const heading = left.children.item(0) as HTMLElement | null;
+      const list = left.children.item(1) as HTMLElement | null;
       if (heading) heading.style.flexShrink = '0';
       if (list) {
         list.style.flex = '1 1 auto';
@@ -101,8 +102,8 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
       }
     };
 
-    const getFirstArticleHeight = (element: HTMLElement) => {
-      const list = element.children.item(1) as HTMLElement | null;
+    const getFirstArticleHeight = () => {
+      const list = left.children.item(1) as HTMLElement | null;
       const first = list?.children.item(0) as HTMLElement | null;
       return first ? Math.ceil(first.getBoundingClientRect().height) : 0;
     };
@@ -110,8 +111,8 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
     const reset = () => {
       grid.style.alignItems = '';
       middle.style.height = '';
-      resetSide(left);
-      resetSide(right);
+      resetColumn(left);
+      resetColumn(right);
     };
 
     const sync = () => {
@@ -124,23 +125,15 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
 
         grid.style.alignItems = 'start';
         middle.style.height = '';
-        resetSide(left);
-        resetSide(right);
+        resetColumn(left);
+        // Always clear any old inline scroll styles from Tiêu điểm.
+        resetColumn(right);
 
         frame = window.requestAnimationFrame(() => {
           const baseHeight = Math.ceil(middle.getBoundingClientRect().height);
           if (baseHeight <= 0) return;
-
-          // Use the taller first article from the two side lists as the extra
-          // allowance, so both side columns stay equal in height.
-          const extraArticleHeight = Math.max(
-            getFirstArticleHeight(left),
-            getFirstArticleHeight(right),
-          );
-          const targetHeight = baseHeight + extraArticleHeight;
-
-          applySide(left, targetHeight);
-          applySide(right, targetHeight);
+          const targetHeight = baseHeight + getFirstArticleHeight();
+          applyLeftScroll(targetHeight);
         });
       });
     };
