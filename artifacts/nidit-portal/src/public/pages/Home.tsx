@@ -371,19 +371,30 @@ export default function HomePage() {
       {/* ===== Quick links ===== */}
       <section className="container-portal mt-14">
         <SectionHead title={t('Truy cập nhanh', 'Quick access')} />
-        <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-          <div className="grid grid-cols-2 gap-px border border-rule bg-rule md:grid-cols-3">
+        <div className="grid gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
             {[
-              { href: '/van-ban', icon: FileText, l: t('Tra cứu văn bản', 'Find documents') },
-              { href: '/du-lieu-ai', icon: Database, l: t('Kho dữ liệu AI', 'AI data catalogue') },
-              { href: '/danh-gia-kiem-dinh', icon: ShieldCheck, l: t('Đăng ký kiểm định', 'Request testing') },
-              { href: '/cong-bo-khoa-hoc', icon: BookOpen, l: t('Công bố khoa học', 'Publications') },
-              { href: '/nghien-cuu', icon: FlaskConical, l: t('Nhiệm vụ KH&CN', 'R&D projects') },
-              { href: '/tim-kiem', icon: Search, l: t('Tìm kiếm nâng cao', 'Search') },
+              { href: '/van-ban', icon: FileText, l: t('Tra cứu văn bản', 'Find documents'), bg: '#eeeafe', accent: '#6341c8' },
+              { href: '/du-lieu-ai', icon: Database, l: t('Kho dữ liệu AI', 'AI data catalogue'), bg: '#e8efff', accent: '#365fc4' },
+              { href: '/danh-gia-kiem-dinh', icon: ShieldCheck, l: t('Đăng ký kiểm định', 'Request testing'), bg: '#e8f3ec', accent: '#32804b' },
+              { href: '/cong-bo-khoa-hoc', icon: BookOpen, l: t('Công bố khoa học', 'Publications'), bg: '#fbecea', accent: '#b44239' },
+              { href: '/nghien-cuu', icon: FlaskConical, l: t('Nhiệm vụ KH&CN', 'R&D projects'), bg: '#fff1dc', accent: '#ad650e' },
+              { href: '/tim-kiem', icon: Search, l: t('Tìm kiếm nâng cao', 'Search'), bg: '#e6f2f6', accent: '#257891' },
             ].map((q) => (
-              <Link key={q.href} href={q.href} className="group flex items-center gap-3 bg-card px-4 py-4 hover:bg-paper" data-testid={`link-quick-${q.href.slice(1)}`}>
-                <q.icon className="h-5 w-5 shrink-0 text-seal" />
-                <span className="text-sm font-semibold text-ink group-hover:text-navy">{q.l}</span>
+              <Link key={q.href} href={q.href}
+                className="group relative flex min-h-[172px] flex-col justify-between gap-5 overflow-hidden rounded-md border border-black/5 p-5 transition-shadow hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-navy sm:p-6"
+                style={{ backgroundColor: q.bg }} data-testid={`link-quick-${q.href.slice(1)}`}>
+                <span aria-hidden="true" className="pointer-events-none absolute -right-6 -top-6 h-36 w-36 rounded-full opacity-[0.12]"
+                  style={{ backgroundImage: `radial-gradient(${q.accent} 1.3px, transparent 1.3px)`, backgroundSize: '8px 8px', maskImage: 'linear-gradient(225deg, #000, transparent)' }} />
+                <span className="relative flex items-center gap-4">
+                  <span className="grid h-14 w-14 shrink-0 place-items-center rounded-md text-white" style={{ backgroundColor: q.accent }}>
+                    <q.icon className="h-8 w-8" strokeWidth={1.8} aria-hidden="true" />
+                  </span>
+                  <span className="font-display text-xl font-bold leading-snug text-ink lg:text-[1.35rem]">{q.l}</span>
+                </span>
+                <span className="relative inline-flex items-center gap-2 text-sm font-medium text-ink/70 group-hover:text-ink">
+                  {t('Xem thêm', 'Learn more')}<ArrowRight className="h-5 w-5 transition-transform motion-safe:group-hover:translate-x-1" aria-hidden="true" />
+                </span>
               </Link>
             ))}
           </div>
