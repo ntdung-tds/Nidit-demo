@@ -2,9 +2,11 @@
   const CONTACT_PATH = '#/lien-he';
   const CRM_PATH = '#/quan-tri';
   const ORG_PATH = '#/gioi-thieu/co-cau-to-chuc';
+  const TRAINING_SLUG = 'tap-huan-ky-nang-so-va-an-toan-thong-tin-cho-can-bo-cong-chuc-nam-2026';
   const text = (el) => (el?.textContent || '').replace(/\s+/g, ' ').trim();
   const lower = (el) => text(el).toLocaleLowerCase('vi-VN');
   const isMobile = () => window.matchMedia('(max-width: 639px)').matches;
+  const isDesktopNav = () => window.matchMedia('(min-width: 1280px)').matches;
 
   function patchMobileMasthead() {
     if (!isMobile()) return;
@@ -31,6 +33,43 @@
     if (!contactHref) return CRM_PATH;
     if (contactHref.includes('#/')) return contactHref.replace(/#\/[^?#]*/, CRM_PATH);
     return CRM_PATH;
+  }
+
+  function patchDesktopLogin() {
+    const existing = document.querySelector('[data-demo-desktop-login="1"]');
+    if (!isDesktopNav()) {
+      existing?.remove();
+      return;
+    }
+    if (existing) return;
+
+    const homeLink = document.querySelector('[data-testid="link-nav-home"]');
+    const navList = homeLink?.closest('ul');
+    const navContainer = navList?.parentElement;
+    if (!navList || !navContainer) return;
+
+    const login = document.createElement('a');
+    login.dataset.demoDesktopLogin = '1';
+    login.href = CRM_PATH;
+    login.textContent = 'Đăng nhập';
+    login.setAttribute('data-testid', 'link-desktop-login');
+    login.style.height = '44px';
+    login.style.display = 'inline-flex';
+    login.style.alignItems = 'center';
+    login.style.justifyContent = 'center';
+    login.style.flexShrink = '0';
+    login.style.padding = '0 14px';
+    login.style.marginLeft = 'auto';
+    login.style.fontSize = '0.8rem';
+    login.style.fontWeight = '700';
+    login.style.textTransform = 'uppercase';
+    login.style.letterSpacing = '0.03em';
+    login.style.color = '#fff';
+    login.style.textDecoration = 'none';
+    login.style.borderLeft = '1px solid rgba(255,255,255,.16)';
+    login.addEventListener('mouseenter', () => { login.style.background = 'rgba(255,255,255,.1)'; });
+    login.addEventListener('mouseleave', () => { login.style.background = ''; });
+    navContainer.appendChild(login);
   }
 
   function patchMobileLoginRow() {
@@ -89,6 +128,36 @@
     // Luôn đặt đúng ngay sau Liên hệ cấp chính, không nằm trong nhóm Giới thiệu
     // và cũng không rơi xuống vùng điều khiển/ngôn ngữ phía cuối menu.
     if (row.previousElementSibling !== contactLi) contactLi.insertAdjacentElement('afterend', row);
+  }
+
+  function patchLatestTrainingArticle() {
+    const latestHeading = Array.from(document.querySelectorAll('h1,h2,h3,h4')).find((el) => {
+      const label = lower(el);
+      return label === 'tin mới nhất' || label === 'latest';
+    });
+    const headingWrap = latestHeading?.parentElement;
+    const latestColumn = headingWrap?.parentElement;
+    if (!latestColumn) return;
+
+    const list = latestColumn.querySelector('ol');
+    if (!list) return;
+    if (list.querySelector(`a[href*="${TRAINING_SLUG}"]`)) return;
+
+    const first = list.querySelector(':scope > li');
+    if (!first) return;
+    const row = first.cloneNode(true);
+    row.dataset.demoTrainingLatest = '1';
+
+    const date = row.querySelector('div');
+    if (date) date.textContent = '28/09/2026 14:02';
+
+    const link = row.querySelector('a');
+    if (link) {
+      link.setAttribute('href', `#/tin-tuc/${TRAINING_SLUG}`);
+      link.textContent = 'Tập huấn kỹ năng số và an toàn thông tin cho cán bộ, công chức năm 2026';
+      link.removeAttribute('data-testid');
+    }
+    list.appendChild(row);
   }
 
   function patchOrgLeadershipChart() {
@@ -222,7 +291,16 @@
     focusList.appendChild(clone);
   }
 
-  function patchAll() { patchMobileMasthead(); patchMobileLoginRow(); patchOrgLeadershipChart(); patchContactForm(); patchContactMap(); patchFocusSeventhArticle(); }
+  function patchAll() {
+    patchMobileMasthead();
+    patchDesktopLogin();
+    patchMobileLoginRow();
+    patchLatestTrainingArticle();
+    patchOrgLeadershipChart();
+    patchContactForm();
+    patchContactMap();
+    patchFocusSeventhArticle();
+  }
   let scheduled = false;
   const schedulePatch = () => { if (scheduled) return; scheduled = true; requestAnimationFrame(() => { scheduled = false; patchAll(); }); };
   const observer = new MutationObserver(schedulePatch);
