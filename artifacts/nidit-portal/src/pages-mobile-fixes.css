@@ -89,3 +89,24 @@ body,
     background: rgba(19, 55, 105, 0.34);
   }
 }
+
+/* The carousel determines the desktop row height; side lists scroll without shrinking articles. */
+@media (min-width: 1024px) {
+  .newsroom-side {
+    display: flex;
+    flex-direction: column;
+    height: 0;
+    min-height: 100%;
+    min-width: 0;
+  }
+  .newsroom-side > :first-child { flex-shrink: 0; }
+  .newsroom-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(19, 55, 105, .34) transparent;
+    scrollbar-gutter: stable;
+    padding-right: 6px;
+  }
+}
