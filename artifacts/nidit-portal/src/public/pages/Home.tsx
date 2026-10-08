@@ -107,7 +107,7 @@ export default function HomePage() {
     <div>
       {/* ===== Front page: three-column newsroom grid ===== */}
       <section className="container-portal pt-6" aria-label={t('Tin nổi bật', 'Top stories')}>
-        <div className="grid gap-x-7 gap-y-8 lg:grid-cols-[250px_minmax(0,1fr)_280px]">
+        <div className="grid items-start gap-x-7 gap-y-8 lg:grid-cols-[250px_minmax(0,1fr)_280px]">
           {/* latest */}
           <div className="order-2 lg:order-1 lg:border-r lg:border-rule lg:pr-6">
             <SectionHead title={t('Tin mới nhất', 'Latest')} href="/tin-tuc" />
@@ -125,9 +125,9 @@ export default function HomePage() {
           {/* featured column */}
           <div className="order-3 lg:border-l lg:border-rule lg:pl-6">
             <SectionHead title={t('Tiêu điểm', 'In focus')} />
-            <div className="space-y-4">
+            <div className="focus-articles flex flex-col gap-5">
               {sideFeatured.map((a) => (
-                <article key={a.id} className="group flex gap-3 border-b border-rule pb-4 last:border-0">
+                <article key={a.id} className="group flex min-h-28 items-start gap-3 border-b border-rule pb-5 last:border-0">
                   <Link href={`/tin-tuc/${a.slug}`} className="w-24 shrink-0" tabIndex={-1} aria-hidden><Img src={a.coverImage} alt={a.title} ratio="aspect-[4/3]" /></Link>
                   <h3 className="font-display text-[0.92rem] font-semibold leading-snug text-ink"><Link href={`/tin-tuc/${a.slug}`} className="headline-link">{a.title}</Link></h3>
                 </article>
