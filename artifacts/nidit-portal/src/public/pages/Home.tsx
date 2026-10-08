@@ -4,11 +4,35 @@ import { ArrowRight, CalendarDays, Database, Download, FileText, FlaskConical, I
 import {
   useGetHomeFeed, getGetHomeFeedQueryKey, useListFields, useListPublications, getListPublicationsQueryKey,
   useListPopularArticles, getListPopularArticlesQueryKey, useListEvaluationServices, useListMenuItems, getListMenuItemsQueryKey,
+  useListArticles, getListArticlesQueryKey,
 } from '@workspace/api-client-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ACCESS_LABEL, PROJECT_STATUS_LABEL, PUB_TYPE_LABEL, buildMenuTree, fmtDate, fmtDateTime, fmtNum, usePortal, useSeo } from '../lib';
 import { ArticleCard, ArticleMeta, ErrorState, FieldIcon, Img, SectionHead, SmartLink, Tag } from '../ui';
 import { useMenuLabel } from '../Layout';
+
+const SECTION_SUPPLEMENTS: Record<string, { title: string; date: string }[]> = {
+  'tin-hoat-dong': [
+    { title: 'Viện tổ chức họp chuyên môn về nhiệm vụ khoa học và công nghệ quý IV/2026', date: '27/09/2026' },
+    { title: 'Đoàn công tác làm việc về phát triển hạ tầng dữ liệu và nền tảng số dùng chung', date: '24/09/2026' },
+    { title: 'Tăng cường phối hợp nghiên cứu, đào tạo và chuyển giao công nghệ số', date: '20/09/2026' },
+  ],
+  'tin-chuyen-nganh': [
+    { title: 'Hạ tầng dữ liệu số và yêu cầu liên thông trong các nền tảng dùng chung', date: '25/09/2026' },
+    { title: 'Xu hướng ứng dụng trí tuệ nhân tạo có trách nhiệm trong khu vực công', date: '22/09/2026' },
+    { title: 'An toàn thông tin trong quá trình chuyển đổi số và khai thác dữ liệu', date: '19/09/2026' },
+  ],
+  'su-kien-hoi-thao': [
+    { title: 'Tọa đàm khoa học về tiêu chuẩn dữ liệu và khả năng liên thông hệ thống', date: '15/09/2026' },
+    { title: 'Hội thảo chuyên đề về công nghệ số và đổi mới sáng tạo', date: '12/09/2026' },
+    { title: 'Chương trình kết nối chuyên gia, nhà khoa học và doanh nghiệp công nghệ', date: '09/09/2026' },
+  ],
+  'thong-bao': [
+    { title: 'Thông báo lịch tiếp công dân và làm việc tháng 10/2026', date: '21/09/2026' },
+    { title: 'Thông báo cập nhật đầu mối tiếp nhận hồ sơ và yêu cầu trực tuyến', date: '17/09/2026' },
+    { title: 'Thông báo kế hoạch bảo trì, nâng cấp một số dịch vụ trực tuyến', date: '12/09/2026' },
+  ],
+};
 
 function HomeSkeleton() {
   return (
@@ -35,15 +59,37 @@ export default function HomePage() {
   const linkParams = { location: 'links' } as const;
   const links = useListMenuItems(linkParams, { query: { queryKey: getListMenuItemsQueryKey(linkParams) } });
 
+  const activityParams = { page: 1, pageSize: 7, lang, category: 'tin-hoat-dong' } as const;
+  const sectorParams = { page: 1, pageSize: 7, lang, category: 'tin-chuyen-nganh' } as const;
+  const eventParams = { page: 1, pageSize: 7, lang, category: 'su-kien-hoi-thao' } as const;
+  const noticeParams = { page: 1, pageSize: 7, lang, category: 'thong-bao' } as const;
+  const activityFeed = useListArticles(activityParams, { query: { queryKey: getListArticlesQueryKey(activityParams) } });
+  const sectorFeed = useListArticles(sectorParams, { query: { queryKey: getListArticlesQueryKey(sectorParams) } });
+  const eventFeed = useListArticles(eventParams, { query: { queryKey: getListArticlesQueryKey(eventParams) } });
+  const noticeFeed = useListArticles(noticeParams, { query: { queryKey: getListArticlesQueryKey(noticeParams) } });
+
   if (feed.isLoading) return <HomeSkeleton />;
   if (feed.isError || !feed.data) return <div className="container-portal py-16"><ErrorState onRetry={() => feed.refetch()} /></div>;
   const f = feed.data;
   const events = f.sections.find((section) => section.categorySlug === 'su-kien-hoi-thao')?.articles ?? [];
   const slides = (events.length ? events : f.featured.length ? f.featured : f.latest).slice(0, 4);
   const lead = slides[0];
-  const sideFeatured = f.featured.slice(1, 6);
+  const sideFeatured = Array.from(
+    new Map(
+      [...f.featured, ...f.latest]
+        .filter((a) => a.id !== lead?.id)
+        .map((a) => [a.id, a]),
+    ).values(),
+  ).slice(0, 8);
   const latest = f.latest.filter((a) => a.id !== lead?.id).slice(0, 8);
   const mostRead = f.mostRead.length ? f.mostRead : popular.data ?? [];
+
+  const sectionFeedItems: Record<string, typeof f.sections[number]['articles'] | undefined> = {
+    'tin-hoat-dong': activityFeed.data?.items,
+    'tin-chuyen-nganh': sectorFeed.data?.items,
+    'su-kien-hoi-thao': eventFeed.data?.items,
+    'thong-bao': noticeFeed.data?.items,
+  };
 
   const stats = [
     { k: t('Lĩnh vực', 'Fields'), v: f.stats.fields, href: '/linh-vuc' },
@@ -126,7 +172,10 @@ export default function HomePage() {
       <div className="container-portal mt-12 grid gap-10 lg:grid-cols-[1fr_300px]">
         <div className="space-y-12">
           {f.sections.filter((s) => s.articles.length).map((sec) => {
-            const [first, ...rest] = sec.articles;
+            const articles = sectionFeedItems[sec.categorySlug]?.length ? sectionFeedItems[sec.categorySlug]! : sec.articles;
+            const [first, ...rest] = articles;
+            const visibleRest = rest.slice(0, 6);
+            const extra = (SECTION_SUPPLEMENTS[sec.categorySlug] ?? []).slice(0, Math.max(0, 6 - visibleRest.length));
             return (
               <section key={sec.categoryId} aria-label={sec.categoryName}>
                 <SectionHead title={sec.categoryName} href={`/tin-tuc/chuyen-muc/${sec.categorySlug}`} />
@@ -138,10 +187,16 @@ export default function HomePage() {
                     <ArticleMeta a={first} className="mt-2" />
                   </article>
                   <ul className="divide-y divide-rule">
-                    {rest.slice(0, 4).map((a) => (
+                    {visibleRest.map((a) => (
                       <li key={a.id} className="py-3 first:pt-0">
                         <Link href={`/tin-tuc/${a.slug}`} className="headline-link font-display text-[0.98rem] font-semibold leading-snug text-ink">{a.title}</Link>
                         <div className="meta mt-1 num">{fmtDate(a.publishedAt)}</div>
+                      </li>
+                    ))}
+                    {extra.map((a) => (
+                      <li key={`${sec.categorySlug}-${a.title}`} className="py-3 first:pt-0">
+                        <Link href={`/tin-tuc/chuyen-muc/${sec.categorySlug}`} className="headline-link font-display text-[0.98rem] font-semibold leading-snug text-ink">{a.title}</Link>
+                        <div className="meta mt-1 num">{a.date}</div>
                       </li>
                     ))}
                   </ul>
@@ -198,6 +253,23 @@ export default function HomePage() {
                 </li>
               ))}
             </ul>
+          </section>
+          <section>
+            <SectionHead title={t('Kiểm định', 'Accreditation')} href="/danh-gia-kiem-dinh" as="h2" />
+            {(services.data ?? []).length === 0 ? (
+              <p className="border border-dashed border-rule p-4 text-sm text-muted-foreground">{t('Danh mục dịch vụ đang được cập nhật.', 'The service catalogue is being updated.')}</p>
+            ) : (
+              <ul className="divide-y divide-rule border-y border-rule">
+                {services.data!.slice(0, 5).map((s) => (
+                  <li key={s.id} className="py-3">
+                    <Link href={`/danh-gia-kiem-dinh/${s.slug}`} className="group flex items-start gap-2.5">
+                      <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center bg-secondary text-navy"><ShieldCheck className="h-4 w-4" /></span>
+                      <span className="headline-link text-[0.85rem] font-medium leading-snug text-ink">{s.name}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
           </section>
         </aside>
       </div>
