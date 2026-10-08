@@ -45,10 +45,10 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
     };
   }, [api]);
 
-  // Desktop: only the left "Tin mới nhất" column is constrained and scrollable.
-  // The right "Tiêu điểm" column is intentionally left completely natural —
-  // no fixed height, max-height or overflow — so all six focus stories can be
-  // displayed without an internal scrollbar.
+  // Desktop: only "Tin mới nhất" on the left is constrained and scrollable.
+  // "Tiêu điểm" on the right is explicitly forced back to natural layout so
+  // no stale inline style, utility class or previous demo bundle can create an
+  // internal scrollbar there.
   useEffect(() => {
     const section = sectionRef.current;
     const middle = section?.parentElement as HTMLElement | null;
@@ -60,16 +60,16 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
     const desktop = window.matchMedia('(min-width: 1024px)');
     let frame = 0;
 
-    const resetColumn = (element: HTMLElement) => {
-      element.style.height = '';
-      element.style.maxHeight = '';
-      element.style.display = '';
-      element.style.flexDirection = '';
-      element.style.overflow = '';
-      element.style.minHeight = '';
+    const clearLeft = () => {
+      left.style.height = '';
+      left.style.maxHeight = '';
+      left.style.display = '';
+      left.style.flexDirection = '';
+      left.style.overflow = '';
+      left.style.minHeight = '';
 
-      const heading = element.children.item(0) as HTMLElement | null;
-      const list = element.children.item(1) as HTMLElement | null;
+      const heading = left.children.item(0) as HTMLElement | null;
+      const list = left.children.item(1) as HTMLElement | null;
       if (heading) heading.style.flexShrink = '';
       if (list) {
         list.style.flex = '';
@@ -78,6 +78,38 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
         list.style.overscrollBehavior = '';
         list.style.scrollbarGutter = '';
         list.style.paddingRight = '';
+      }
+    };
+
+    const forceRightNatural = () => {
+      right.style.setProperty('height', 'auto', 'important');
+      right.style.setProperty('max-height', 'none', 'important');
+      right.style.setProperty('min-height', '0', 'important');
+      right.style.setProperty('overflow', 'visible', 'important');
+      right.style.removeProperty('display');
+      right.style.removeProperty('flex-direction');
+
+      const heading = right.children.item(0) as HTMLElement | null;
+      const list = right.children.item(1) as HTMLElement | null;
+      if (heading) heading.style.removeProperty('flex-shrink');
+      if (list) {
+        list.style.setProperty('height', 'auto', 'important');
+        list.style.setProperty('max-height', 'none', 'important');
+        list.style.setProperty('min-height', '0', 'important');
+        list.style.setProperty('overflow', 'visible', 'important');
+        list.style.setProperty('overflow-y', 'visible', 'important');
+        list.style.setProperty('scrollbar-gutter', 'auto', 'important');
+        list.style.removeProperty('overscroll-behavior');
+        list.style.removeProperty('padding-right');
+        list.style.removeProperty('flex');
+      }
+    };
+
+    const clearRightForce = () => {
+      ['height', 'max-height', 'min-height', 'overflow'].forEach((property) => right.style.removeProperty(property));
+      const list = right.children.item(1) as HTMLElement | null;
+      if (list) {
+        ['height', 'max-height', 'min-height', 'overflow', 'overflow-y', 'scrollbar-gutter'].forEach((property) => list.style.removeProperty(property));
       }
     };
 
@@ -111,8 +143,8 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
     const reset = () => {
       grid.style.alignItems = '';
       middle.style.height = '';
-      resetColumn(left);
-      resetColumn(right);
+      clearLeft();
+      clearRightForce();
     };
 
     const sync = () => {
@@ -125,15 +157,16 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
 
         grid.style.alignItems = 'start';
         middle.style.height = '';
-        resetColumn(left);
-        // Always clear any old inline scroll styles from Tiêu điểm.
-        resetColumn(right);
+        clearLeft();
+        forceRightNatural();
 
         frame = window.requestAnimationFrame(() => {
           const baseHeight = Math.ceil(middle.getBoundingClientRect().height);
           if (baseHeight <= 0) return;
           const targetHeight = baseHeight + getFirstArticleHeight();
           applyLeftScroll(targetHeight);
+          // Re-assert after layout in case another observer/class touched it.
+          forceRightNatural();
         });
       });
     };
