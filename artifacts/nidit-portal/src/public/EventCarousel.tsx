@@ -45,10 +45,10 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
     };
   }, [api]);
 
-  // Desktop: only "Tin mới nhất" on the left is constrained and scrollable.
-  // "Tiêu điểm" on the right is explicitly forced back to natural layout so
-  // no stale inline style, utility class or previous demo bundle can create an
-  // internal scrollbar there.
+  // Desktop: lấy chiều cao tự nhiên của cột "Tin mới nhất" làm chuẩn.
+  // Cột carousel ở giữa và cột "Tiêu điểm" bên phải được kéo cao đúng bằng
+  // cột trái. Tiêu điểm không dùng scrollbar; 7 bài được phân bố trong phần
+  // chiều cao còn lại để giữ bố cục cân đối. Mobile/tablet dùng layout tự nhiên.
   useEffect(() => {
     const section = sectionRef.current;
     const middle = section?.parentElement as HTMLElement | null;
@@ -60,119 +60,124 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
     const desktop = window.matchMedia('(min-width: 1024px)');
     let frame = 0;
 
-    const clearLeft = () => {
-      left.style.height = '';
-      left.style.maxHeight = '';
-      left.style.display = '';
-      left.style.flexDirection = '';
-      left.style.overflow = '';
-      left.style.minHeight = '';
-
-      const heading = left.children.item(0) as HTMLElement | null;
-      const list = left.children.item(1) as HTMLElement | null;
-      if (heading) heading.style.flexShrink = '';
-      if (list) {
-        list.style.flex = '';
-        list.style.minHeight = '';
-        list.style.overflowY = '';
-        list.style.overscrollBehavior = '';
-        list.style.scrollbarGutter = '';
-        list.style.paddingRight = '';
-      }
-    };
-
-    const forceRightNatural = () => {
-      right.style.setProperty('height', 'auto', 'important');
-      right.style.setProperty('max-height', 'none', 'important');
-      right.style.setProperty('min-height', '0', 'important');
-      right.style.setProperty('overflow', 'visible', 'important');
-      right.style.removeProperty('display');
-      right.style.removeProperty('flex-direction');
-
-      const heading = right.children.item(0) as HTMLElement | null;
-      const list = right.children.item(1) as HTMLElement | null;
-      if (heading) heading.style.removeProperty('flex-shrink');
-      if (list) {
-        list.style.setProperty('height', 'auto', 'important');
-        list.style.setProperty('max-height', 'none', 'important');
-        list.style.setProperty('min-height', '0', 'important');
-        list.style.setProperty('overflow', 'visible', 'important');
-        list.style.setProperty('overflow-y', 'visible', 'important');
-        list.style.setProperty('scrollbar-gutter', 'auto', 'important');
-        list.style.removeProperty('overscroll-behavior');
-        list.style.removeProperty('padding-right');
-        list.style.removeProperty('flex');
-      }
-    };
-
-    const clearRightForce = () => {
-      ['height', 'max-height', 'min-height', 'overflow'].forEach((property) => right.style.removeProperty(property));
-      const list = right.children.item(1) as HTMLElement | null;
-      if (list) {
-        ['height', 'max-height', 'min-height', 'overflow', 'overflow-y', 'scrollbar-gutter'].forEach((property) => list.style.removeProperty(property));
-      }
-    };
-
-    const applyLeftScroll = (height: number) => {
-      left.style.height = `${height}px`;
-      left.style.maxHeight = `${height}px`;
-      left.style.display = 'flex';
-      left.style.flexDirection = 'column';
-      left.style.overflow = 'hidden';
-      left.style.minHeight = '0';
-
-      const heading = left.children.item(0) as HTMLElement | null;
-      const list = left.children.item(1) as HTMLElement | null;
-      if (heading) heading.style.flexShrink = '0';
-      if (list) {
-        list.style.flex = '1 1 auto';
-        list.style.minHeight = '0';
-        list.style.overflowY = 'auto';
-        list.style.overscrollBehavior = 'contain';
-        list.style.scrollbarGutter = 'stable';
-        list.style.paddingRight = '0.5rem';
-      }
-    };
-
-    const getFirstArticleHeight = () => {
-      const list = left.children.item(1) as HTMLElement | null;
-      const first = list?.children.item(0) as HTMLElement | null;
-      return first ? Math.ceil(first.getBoundingClientRect().height) : 0;
-    };
-
-    const reset = () => {
+    const clear = () => {
       grid.style.alignItems = '';
       middle.style.height = '';
-      clearLeft();
-      clearRightForce();
+      middle.style.minHeight = '';
+      right.style.height = '';
+      right.style.minHeight = '';
+      right.style.display = '';
+      right.style.flexDirection = '';
+      right.style.overflow = '';
+
+      section.style.height = '';
+      section.style.display = '';
+      section.style.flexDirection = '';
+      section.style.minHeight = '';
+
+      const carouselHeading = section.children.item(0) as HTMLElement | null;
+      const carouselViewport = section.children.item(1) as HTMLElement | null;
+      const carouselControls = section.children.item(2) as HTMLElement | null;
+      if (carouselHeading) carouselHeading.style.flexShrink = '';
+      if (carouselViewport) {
+        carouselViewport.style.flex = '';
+        carouselViewport.style.minHeight = '';
+      }
+      if (carouselControls) carouselControls.style.flexShrink = '';
+
+      const rightHeading = right.children.item(0) as HTMLElement | null;
+      const rightList = right.children.item(1) as HTMLElement | null;
+      if (rightHeading) rightHeading.style.flexShrink = '';
+      if (rightList) {
+        rightList.style.flex = '';
+        rightList.style.minHeight = '';
+        rightList.style.display = '';
+        rightList.style.gridTemplateRows = '';
+        rightList.style.rowGap = '';
+        rightList.style.overflow = '';
+      }
+      if (rightList) {
+        Array.from(rightList.children).forEach((item) => {
+          const el = item as HTMLElement;
+          el.style.minHeight = '';
+          el.style.overflow = '';
+          el.style.alignItems = '';
+          const title = el.querySelector('h3') as HTMLElement | null;
+          if (title) {
+            title.style.display = '';
+            title.style.webkitLineClamp = '';
+            title.style.webkitBoxOrient = '';
+            title.style.overflow = '';
+          }
+        });
+      }
     };
 
     const sync = () => {
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => {
-        if (!desktop.matches) {
-          reset();
-          return;
-        }
+        clear();
+        if (!desktop.matches) return;
+
+        const targetHeight = Math.ceil(left.getBoundingClientRect().height);
+        if (targetHeight <= 0) return;
 
         grid.style.alignItems = 'start';
-        middle.style.height = '';
-        clearLeft();
-        forceRightNatural();
 
-        frame = window.requestAnimationFrame(() => {
-          const baseHeight = Math.ceil(middle.getBoundingClientRect().height);
-          if (baseHeight <= 0) return;
-          const targetHeight = baseHeight + getFirstArticleHeight();
-          applyLeftScroll(targetHeight);
-          // Re-assert after layout in case another observer/class touched it.
-          forceRightNatural();
-        });
+        middle.style.height = `${targetHeight}px`;
+        middle.style.minHeight = `${targetHeight}px`;
+        section.style.height = '100%';
+        section.style.minHeight = '0';
+        section.style.display = 'flex';
+        section.style.flexDirection = 'column';
+
+        const carouselHeading = section.children.item(0) as HTMLElement | null;
+        const carouselViewport = section.children.item(1) as HTMLElement | null;
+        const carouselControls = section.children.item(2) as HTMLElement | null;
+        if (carouselHeading) carouselHeading.style.flexShrink = '0';
+        if (carouselViewport) {
+          carouselViewport.style.flex = '1 1 auto';
+          carouselViewport.style.minHeight = '0';
+        }
+        if (carouselControls) carouselControls.style.flexShrink = '0';
+
+        right.style.height = `${targetHeight}px`;
+        right.style.minHeight = `${targetHeight}px`;
+        right.style.display = 'flex';
+        right.style.flexDirection = 'column';
+        right.style.overflow = 'hidden';
+
+        const rightHeading = right.children.item(0) as HTMLElement | null;
+        const rightList = right.children.item(1) as HTMLElement | null;
+        if (rightHeading) rightHeading.style.flexShrink = '0';
+        if (rightList) {
+          const count = Math.max(1, rightList.children.length);
+          rightList.style.flex = '1 1 auto';
+          rightList.style.minHeight = '0';
+          rightList.style.display = 'grid';
+          rightList.style.gridTemplateRows = `repeat(${count}, minmax(0, 1fr))`;
+          rightList.style.rowGap = '0';
+          rightList.style.overflow = 'hidden';
+
+          Array.from(rightList.children).forEach((item) => {
+            const el = item as HTMLElement;
+            el.style.minHeight = '0';
+            el.style.overflow = 'hidden';
+            el.style.alignItems = 'center';
+            const title = el.querySelector('h3') as HTMLElement | null;
+            if (title) {
+              title.style.display = '-webkit-box';
+              title.style.webkitLineClamp = '3';
+              title.style.webkitBoxOrient = 'vertical';
+              title.style.overflow = 'hidden';
+            }
+          });
+        }
       });
     };
 
     const observer = new ResizeObserver(sync);
-    observer.observe(middle);
+    observer.observe(left);
     desktop.addEventListener('change', sync);
     window.addEventListener('resize', sync);
     sync();
@@ -182,7 +187,7 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
       observer.disconnect();
       desktop.removeEventListener('change', sync);
       window.removeEventListener('resize', sync);
-      reset();
+      clear();
     };
   }, [articles.length]);
 
