@@ -2,7 +2,6 @@
   const CONTACT_PATH = '#/lien-he';
   const CRM_PATH = '#/quan-tri';
   const ORG_PATH = '#/gioi-thieu/co-cau-to-chuc';
-  const TRAINING_SLUG = 'tap-huan-ky-nang-so-va-an-toan-thong-tin-cho-can-bo-cong-chuc-nam-2026';
   const text = (el) => (el?.textContent || '').replace(/\s+/g, ' ').trim();
   const lower = (el) => text(el).toLocaleLowerCase('vi-VN');
   const isMobile = () => window.matchMedia('(max-width: 639px)').matches;
@@ -138,36 +137,6 @@
     if (row.previousElementSibling !== contactLi) contactLi.insertAdjacentElement('afterend', row);
   }
 
-  function patchLatestTrainingArticle() {
-    const latestHeading = Array.from(document.querySelectorAll('h1,h2,h3,h4')).find((el) => {
-      const label = lower(el);
-      return label === 'tin mới nhất' || label === 'latest';
-    });
-    const headingWrap = latestHeading?.parentElement;
-    const latestColumn = headingWrap?.parentElement;
-    if (!latestColumn) return;
-
-    const list = latestColumn.querySelector('ol');
-    if (!list) return;
-    if (list.querySelector(`a[href*="${TRAINING_SLUG}"]`)) return;
-
-    const first = list.querySelector(':scope > li');
-    if (!first) return;
-    const row = first.cloneNode(true);
-    row.dataset.demoTrainingLatest = '1';
-
-    const date = row.querySelector('div');
-    if (date) date.textContent = '28/09/2026 14:02';
-
-    const link = row.querySelector('a');
-    if (link) {
-      link.setAttribute('href', `#/tin-tuc/${TRAINING_SLUG}`);
-      link.textContent = 'Tập huấn kỹ năng số và an toàn thông tin cho cán bộ, công chức năm 2026';
-      link.removeAttribute('data-testid');
-    }
-    list.appendChild(row);
-  }
-
   function patchOrgLeadershipChart() {
     if (!location.hash.startsWith(ORG_PATH)) return;
     if (document.querySelector('[data-demo-deputy-leaders="1"]')) return;
@@ -242,72 +211,13 @@
     container.replaceChildren(iframe);
   }
 
-  function patchFocusSeventhArticle() {
-    const focusHeading = Array.from(document.querySelectorAll('h1,h2,h3,h4')).find((el) => {
-      const label = lower(el);
-      return label === 'tiêu điểm' || label === 'in focus';
-    });
-    if (!focusHeading) return;
-
-    const headingWrap = focusHeading.parentElement;
-    const focusColumn = headingWrap?.parentElement;
-    if (!headingWrap || !focusColumn) return;
-
-    const focusList = Array.from(focusColumn.children).find((el) => el !== headingWrap && el.querySelector('article'));
-    if (!focusList) return;
-    const focusArticles = Array.from(focusList.querySelectorAll(':scope > article'));
-    if (focusArticles.length >= 7 || focusArticles.length === 0) return;
-
-    const focusHrefs = new Set(
-      Array.from(focusList.querySelectorAll('a[href]'))
-        .map((a) => a.getAttribute('href'))
-        .filter(Boolean),
-    );
-
-    const latestHeading = Array.from(document.querySelectorAll('h1,h2,h3,h4')).find((el) => {
-      const label = lower(el);
-      return label === 'tin mới nhất' || label === 'latest';
-    });
-    const latestHeadingWrap = latestHeading?.parentElement;
-    const latestColumn = latestHeadingWrap?.parentElement;
-    if (!latestColumn) return;
-
-    const sourceLink = Array.from(latestColumn.querySelectorAll('a[href*="/tin-tuc/"]')).find((a) => {
-      const href = a.getAttribute('href');
-      return href && !focusHrefs.has(href) && text(a).length > 0;
-    });
-    if (!sourceLink) return;
-
-    const clone = focusArticles[0].cloneNode(true);
-    clone.dataset.demoFocusSeventh = '1';
-    const href = sourceLink.getAttribute('href');
-    const title = text(sourceLink);
-    clone.querySelectorAll('a[href]').forEach((a) => a.setAttribute('href', href));
-    const titleLink = clone.querySelector('h3 a, h2 a, a.headline-link');
-    if (titleLink) titleLink.textContent = title;
-
-    const sourceImageLink = Array.from(document.querySelectorAll('a[href]')).find((a) => a.getAttribute('href') === href && a.querySelector('img'));
-    const sourceImage = sourceImageLink?.querySelector('img');
-    const cloneImage = clone.querySelector('img');
-    if (sourceImage && cloneImage) {
-      cloneImage.src = sourceImage.currentSrc || sourceImage.src;
-      cloneImage.alt = title;
-    } else if (cloneImage) {
-      cloneImage.alt = title;
-    }
-
-    focusList.appendChild(clone);
-  }
-
   function patchAll() {
     patchMobileMasthead();
     patchDesktopLogin();
     patchMobileLoginRow();
-    patchLatestTrainingArticle();
     patchOrgLeadershipChart();
     patchContactForm();
     patchContactMap();
-    patchFocusSeventhArticle();
   }
   let scheduled = false;
   const schedulePatch = () => { if (scheduled) return; scheduled = true; requestAnimationFrame(() => { scheduled = false; patchAll(); }); };
