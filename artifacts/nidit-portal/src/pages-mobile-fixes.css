@@ -36,3 +36,56 @@ body,
     max-width: 100%;
   }
 }
+
+/*
+ * Home newsroom balance:
+ * - Tiêu điểm: 6 bài.
+ * - Mỗi chuyên mục Tin hoạt động / Tin chuyên ngành / Sự kiện – Hội thảo / Thông báo: 5 bài ở cột danh sách.
+ * - Desktop/tablet dùng vùng cuộn riêng khi danh sách cao hơn khối bài nổi bật bên trái.
+ * - Mobile giữ cuộn trang tự nhiên để tránh nested-scroll khó thao tác.
+ */
+.container-portal.pt-6 .order-3 > .space-y-4 > article:nth-child(n + 7) {
+  display: none;
+}
+
+.container-portal.mt-12.grid > .space-y-12 > section > .grid.gap-6 > ul > li:nth-child(n + 6) {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .container-portal.pt-6 .order-3 > .space-y-4 {
+    max-height: 32rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    padding-right: 0.4rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(19, 55, 105, 0.34) transparent;
+  }
+
+  .container-portal.mt-12.grid > .space-y-12 > section > .grid.gap-6 > ul {
+    max-height: 31rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    padding-right: 0.45rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(19, 55, 105, 0.34) transparent;
+  }
+
+  .container-portal.pt-6 .order-3 > .space-y-4::-webkit-scrollbar,
+  .container-portal.mt-12.grid > .space-y-12 > section > .grid.gap-6 > ul::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .container-portal.pt-6 .order-3 > .space-y-4::-webkit-scrollbar-track,
+  .container-portal.mt-12.grid > .space-y-12 > section > .grid.gap-6 > ul::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .container-portal.pt-6 .order-3 > .space-y-4::-webkit-scrollbar-thumb,
+  .container-portal.mt-12.grid > .space-y-12 > section > .grid.gap-6 > ul::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(19, 55, 105, 0.34);
+  }
+}
