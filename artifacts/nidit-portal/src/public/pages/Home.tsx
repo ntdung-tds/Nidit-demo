@@ -78,12 +78,13 @@ export default function HomePage() {
   const sideFeatured = Array.from(
     new Map(
       focusPool
-        .filter((a) => a.id !== lead?.id)
+        .filter((a) => a.id !== lead?.id && a.slug !== 'toa-dam-chuyen-de-kiem-dinh-chat-luong-phan-mem-trong-cac-du-an-chuyen-doi-so')
         .map((a) => [a.id, a]),
     ).values(),
-  ).slice(0, 7);
-  const latest = f.latest
-    .filter((a) => a.id !== lead?.id && a.slug !== 'tap-huan-ky-nang-so-va-an-toan-thong-tin-cho-can-bo-cong-chuc-nam-2026')
+  ).slice(0, 6);
+  const latest = Array.from(new Map(focusPool.map((a) => [a.id, a])).values())
+    .filter((a) => a.id !== lead?.id)
+    .sort((a, b) => new Date(b.publishedAt ?? 0).getTime() - new Date(a.publishedAt ?? 0).getTime())
     .slice(0, 8);
   const mostRead = f.mostRead.length ? f.mostRead : popular.data ?? [];
 
@@ -109,9 +110,9 @@ export default function HomePage() {
       <section className="container-portal pt-6" aria-label={t('Tin nổi bật', 'Top stories')}>
         <div className="grid items-start gap-x-7 gap-y-8 lg:grid-cols-[250px_minmax(0,1fr)_280px]">
           {/* latest */}
-          <div className="order-2 lg:order-1 lg:border-r lg:border-rule lg:pr-6">
+          <div className="newsroom-side order-2 lg:order-1 lg:border-r lg:border-rule lg:pr-6">
             <SectionHead title={t('Tin mới nhất', 'Latest')} href="/tin-tuc" />
-            <ol className="divide-y divide-rule">
+            <ol className="newsroom-scroll divide-y divide-rule" tabIndex={0} aria-label={t('Tin mới nhất', 'Latest news')}>
               {latest.map((a) => (
                 <li key={a.id} className="py-2.5 first:pt-0">
                   <div className="num text-[0.68rem] font-medium text-seal">{fmtDateTime(a.publishedAt)}</div>
@@ -123,11 +124,11 @@ export default function HomePage() {
           {/* lead */}
           <div className="order-1 min-w-0 lg:order-2">{slides.length > 0 && <EventCarousel key={`${lang}-${slides.map((a) => a.id).join('-')}`} articles={slides} isEvents={events.length > 0} />}</div>
           {/* featured column */}
-          <div className="order-3 lg:border-l lg:border-rule lg:pl-6">
+          <div className="newsroom-side order-3 lg:border-l lg:border-rule lg:pl-6">
             <SectionHead title={t('Tiêu điểm', 'In focus')} />
-            <div className="focus-articles flex flex-col gap-5">
+            <div className="newsroom-scroll focus-articles flex flex-col gap-4" tabIndex={0} aria-label={t('Tiêu điểm', 'In focus')}>
               {sideFeatured.map((a) => (
-                <article key={a.id} className="group flex min-h-28 items-start gap-3 border-b border-rule pb-5 last:border-0">
+                <article key={a.id} className="group flex shrink-0 items-start gap-3 border-b border-rule pb-4 last:border-0">
                   <Link href={`/tin-tuc/${a.slug}`} className="w-24 shrink-0" tabIndex={-1} aria-hidden><Img src={a.coverImage} alt={a.title} ratio="aspect-[4/3]" /></Link>
                   <h3 className="font-display text-[0.92rem] font-semibold leading-snug text-ink"><Link href={`/tin-tuc/${a.slug}`} className="headline-link">{a.title}</Link></h3>
                 </article>
