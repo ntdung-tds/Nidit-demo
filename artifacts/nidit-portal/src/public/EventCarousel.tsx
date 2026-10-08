@@ -45,143 +45,41 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
     };
   }, [api]);
 
-  // Desktop: lấy chiều cao tự nhiên của cột "Tin mới nhất" làm chuẩn.
-  // Cột carousel ở giữa và cột "Tiêu điểm" bên phải được kéo cao đúng bằng
-  // cột trái. Tiêu điểm không dùng scrollbar; 7 bài được phân bố trong phần
-  // chiều cao còn lại để giữ bố cục cân đối. Mobile/tablet dùng layout tự nhiên.
+  // Match only the carousel to Latest; In focus keeps its natural content height.
   useEffect(() => {
     const section = sectionRef.current;
-    const middle = section?.parentElement as HTMLElement | null;
-    const grid = middle?.parentElement as HTMLElement | null;
-    const left = grid?.children.item(0) as HTMLElement | null;
-    const right = grid?.children.item(2) as HTMLElement | null;
-    if (!section || !middle || !grid || !left || !right) return;
-
+    const middle = section?.parentElement;
+    const left = middle?.parentElement?.children.item(0);
+    if (!section || !middle || !left) return;
     const desktop = window.matchMedia('(min-width: 1024px)');
     let frame = 0;
-
     const clear = () => {
-      grid.style.alignItems = '';
-      middle.style.height = '';
       middle.style.minHeight = '';
-      right.style.height = '';
-      right.style.minHeight = '';
-      right.style.display = '';
-      right.style.flexDirection = '';
-      right.style.overflow = '';
-
-      section.style.height = '';
+      section.style.minHeight = '';
       section.style.display = '';
       section.style.flexDirection = '';
-      section.style.minHeight = '';
-
-      const carouselHeading = section.children.item(0) as HTMLElement | null;
-      const carouselViewport = section.children.item(1) as HTMLElement | null;
-      const carouselControls = section.children.item(2) as HTMLElement | null;
-      if (carouselHeading) carouselHeading.style.flexShrink = '';
-      if (carouselViewport) {
-        carouselViewport.style.flex = '';
-        carouselViewport.style.minHeight = '';
-      }
-      if (carouselControls) carouselControls.style.flexShrink = '';
-
-      const rightHeading = right.children.item(0) as HTMLElement | null;
-      const rightList = right.children.item(1) as HTMLElement | null;
-      if (rightHeading) rightHeading.style.flexShrink = '';
-      if (rightList) {
-        rightList.style.flex = '';
-        rightList.style.minHeight = '';
-        rightList.style.display = '';
-        rightList.style.gridTemplateRows = '';
-        rightList.style.rowGap = '';
-        rightList.style.overflow = '';
-      }
-      if (rightList) {
-        Array.from(rightList.children).forEach((item) => {
-          const el = item as HTMLElement;
-          el.style.minHeight = '';
-          el.style.overflow = '';
-          el.style.alignItems = '';
-          const title = el.querySelector('h3') as HTMLElement | null;
-          if (title) {
-            title.style.display = '';
-            title.style.webkitLineClamp = '';
-            title.style.webkitBoxOrient = '';
-            title.style.overflow = '';
-          }
-        });
-      }
+      const viewport = section.children.item(1) as HTMLElement | null;
+      if (viewport) viewport.style.flex = '';
     };
-
     const sync = () => {
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => {
         clear();
         if (!desktop.matches) return;
-
-        const targetHeight = Math.ceil(left.getBoundingClientRect().height);
-        if (targetHeight <= 0) return;
-
-        grid.style.alignItems = 'start';
-
-        middle.style.height = `${targetHeight}px`;
-        middle.style.minHeight = `${targetHeight}px`;
-        section.style.height = '100%';
-        section.style.minHeight = '0';
+        const height = Math.ceil(left.getBoundingClientRect().height);
+        middle.style.minHeight = `${height}px`;
+        section.style.minHeight = `${height}px`;
         section.style.display = 'flex';
         section.style.flexDirection = 'column';
-
-        const carouselHeading = section.children.item(0) as HTMLElement | null;
-        const carouselViewport = section.children.item(1) as HTMLElement | null;
-        const carouselControls = section.children.item(2) as HTMLElement | null;
-        if (carouselHeading) carouselHeading.style.flexShrink = '0';
-        if (carouselViewport) {
-          carouselViewport.style.flex = '1 1 auto';
-          carouselViewport.style.minHeight = '0';
-        }
-        if (carouselControls) carouselControls.style.flexShrink = '0';
-
-        right.style.height = `${targetHeight}px`;
-        right.style.minHeight = `${targetHeight}px`;
-        right.style.display = 'flex';
-        right.style.flexDirection = 'column';
-        right.style.overflow = 'hidden';
-
-        const rightHeading = right.children.item(0) as HTMLElement | null;
-        const rightList = right.children.item(1) as HTMLElement | null;
-        if (rightHeading) rightHeading.style.flexShrink = '0';
-        if (rightList) {
-          const count = Math.max(1, rightList.children.length);
-          rightList.style.flex = '1 1 auto';
-          rightList.style.minHeight = '0';
-          rightList.style.display = 'grid';
-          rightList.style.gridTemplateRows = `repeat(${count}, minmax(0, 1fr))`;
-          rightList.style.rowGap = '0';
-          rightList.style.overflow = 'hidden';
-
-          Array.from(rightList.children).forEach((item) => {
-            const el = item as HTMLElement;
-            el.style.minHeight = '0';
-            el.style.overflow = 'hidden';
-            el.style.alignItems = 'center';
-            const title = el.querySelector('h3') as HTMLElement | null;
-            if (title) {
-              title.style.display = '-webkit-box';
-              title.style.webkitLineClamp = '3';
-              title.style.webkitBoxOrient = 'vertical';
-              title.style.overflow = 'hidden';
-            }
-          });
-        }
+        const viewport = section.children.item(1) as HTMLElement | null;
+        if (viewport) viewport.style.flex = '1 0 auto';
       });
     };
-
     const observer = new ResizeObserver(sync);
     observer.observe(left);
     desktop.addEventListener('change', sync);
     window.addEventListener('resize', sync);
     sync();
-
     return () => {
       window.cancelAnimationFrame(frame);
       observer.disconnect();
