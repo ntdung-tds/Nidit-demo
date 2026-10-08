@@ -165,7 +165,64 @@
     container.replaceChildren(iframe);
   }
 
-  function patchAll() { patchMobileMasthead(); patchMobileLoginRow(); patchOrgLeadershipChart(); patchContactForm(); patchContactMap(); }
+  function patchFocusSeventhArticle() {
+    const focusHeading = Array.from(document.querySelectorAll('h1,h2,h3,h4')).find((el) => {
+      const label = lower(el);
+      return label === 'tiêu điểm' || label === 'in focus';
+    });
+    if (!focusHeading) return;
+
+    const headingWrap = focusHeading.parentElement;
+    const focusColumn = headingWrap?.parentElement;
+    if (!headingWrap || !focusColumn) return;
+
+    const focusList = Array.from(focusColumn.children).find((el) => el !== headingWrap && el.querySelector('article'));
+    if (!focusList) return;
+    const focusArticles = Array.from(focusList.querySelectorAll(':scope > article'));
+    if (focusArticles.length >= 7 || focusArticles.length === 0) return;
+
+    const focusHrefs = new Set(
+      Array.from(focusList.querySelectorAll('a[href]'))
+        .map((a) => a.getAttribute('href'))
+        .filter(Boolean),
+    );
+
+    const latestHeading = Array.from(document.querySelectorAll('h1,h2,h3,h4')).find((el) => {
+      const label = lower(el);
+      return label === 'tin mới nhất' || label === 'latest';
+    });
+    const latestHeadingWrap = latestHeading?.parentElement;
+    const latestColumn = latestHeadingWrap?.parentElement;
+    if (!latestColumn) return;
+
+    const sourceLink = Array.from(latestColumn.querySelectorAll('a[href*="/tin-tuc/"]')).find((a) => {
+      const href = a.getAttribute('href');
+      return href && !focusHrefs.has(href) && text(a).length > 0;
+    });
+    if (!sourceLink) return;
+
+    const clone = focusArticles[0].cloneNode(true);
+    clone.dataset.demoFocusSeventh = '1';
+    const href = sourceLink.getAttribute('href');
+    const title = text(sourceLink);
+    clone.querySelectorAll('a[href]').forEach((a) => a.setAttribute('href', href));
+    const titleLink = clone.querySelector('h3 a, h2 a, a.headline-link');
+    if (titleLink) titleLink.textContent = title;
+
+    const sourceImageLink = Array.from(document.querySelectorAll('a[href]')).find((a) => a.getAttribute('href') === href && a.querySelector('img'));
+    const sourceImage = sourceImageLink?.querySelector('img');
+    const cloneImage = clone.querySelector('img');
+    if (sourceImage && cloneImage) {
+      cloneImage.src = sourceImage.currentSrc || sourceImage.src;
+      cloneImage.alt = title;
+    } else if (cloneImage) {
+      cloneImage.alt = title;
+    }
+
+    focusList.appendChild(clone);
+  }
+
+  function patchAll() { patchMobileMasthead(); patchMobileLoginRow(); patchOrgLeadershipChart(); patchContactForm(); patchContactMap(); patchFocusSeventhArticle(); }
   let scheduled = false;
   const schedulePatch = () => { if (scheduled) return; scheduled = true; requestAnimationFrame(() => { scheduled = false; patchAll(); }); };
   const observer = new MutationObserver(schedulePatch);
