@@ -46,8 +46,9 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
   }, [api]);
 
   // On desktop the middle Events & Conferences carousel is the height reference.
-  // The two side columns are capped to that exact height and become independently
-  // scrollable when their content is longer. Mobile/tablet keeps natural height.
+  // Both side columns use the same total height. Their headings stay fixed while
+  // only the article lists below them scroll, so the scrollbar uses the entire
+  // remaining height instead of producing a short scroll box with blank space.
   useEffect(() => {
     const section = sectionRef.current;
     const middle = section?.parentElement as HTMLElement | null;
@@ -62,9 +63,43 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
     const resetSide = (element: HTMLElement) => {
       element.style.height = '';
       element.style.maxHeight = '';
-      element.style.overflowY = '';
-      element.style.overscrollBehavior = '';
-      element.style.scrollbarGutter = '';
+      element.style.display = '';
+      element.style.flexDirection = '';
+      element.style.overflow = '';
+      element.style.minHeight = '';
+
+      const heading = element.children.item(0) as HTMLElement | null;
+      const list = element.children.item(1) as HTMLElement | null;
+      if (heading) heading.style.flexShrink = '';
+      if (list) {
+        list.style.flex = '';
+        list.style.minHeight = '';
+        list.style.overflowY = '';
+        list.style.overscrollBehavior = '';
+        list.style.scrollbarGutter = '';
+        list.style.paddingRight = '';
+      }
+    };
+
+    const applySide = (element: HTMLElement, height: number) => {
+      element.style.height = `${height}px`;
+      element.style.maxHeight = `${height}px`;
+      element.style.display = 'flex';
+      element.style.flexDirection = 'column';
+      element.style.overflow = 'hidden';
+      element.style.minHeight = '0';
+
+      const heading = element.children.item(0) as HTMLElement | null;
+      const list = element.children.item(1) as HTMLElement | null;
+      if (heading) heading.style.flexShrink = '0';
+      if (list) {
+        list.style.flex = '1 1 auto';
+        list.style.minHeight = '0';
+        list.style.overflowY = 'auto';
+        list.style.overscrollBehavior = 'contain';
+        list.style.scrollbarGutter = 'stable';
+        list.style.paddingRight = '0.5rem';
+      }
     };
 
     const reset = () => {
@@ -82,25 +117,17 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
           return;
         }
 
-        // Prevent the grid row's tallest side column from stretching the carousel.
+        // Let the middle carousel define the row height naturally.
         grid.style.alignItems = 'start';
         middle.style.height = '';
         resetSide(left);
         resetSide(right);
 
-        // Measure after the carousel has returned to its natural content height.
-        window.cancelAnimationFrame(frame);
         frame = window.requestAnimationFrame(() => {
           const height = Math.ceil(section.getBoundingClientRect().height);
           if (height <= 0) return;
-
-          [left, right].forEach((element) => {
-            element.style.height = `${height}px`;
-            element.style.maxHeight = `${height}px`;
-            element.style.overflowY = 'auto';
-            element.style.overscrollBehavior = 'contain';
-            element.style.scrollbarGutter = 'stable';
-          });
+          applySide(left, height);
+          applySide(right, height);
         });
       });
     };
