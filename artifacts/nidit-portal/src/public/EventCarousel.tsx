@@ -45,27 +45,33 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
     };
   }, [api]);
 
-  // On desktop the left "Tin mới nhất" column is the height reference for the
-  // whole top-news row. Observe that column and keep the carousel + focus list
-  // exactly the same height. This avoids hard-coded pixel heights and continues
-  // to work when fonts, copy length or viewport width change.
+  // On desktop the middle Events & Conferences carousel is the height reference.
+  // The two side columns are capped to that exact height and become independently
+  // scrollable when their content is longer. Mobile/tablet keeps natural height.
   useEffect(() => {
     const section = sectionRef.current;
     const middle = section?.parentElement as HTMLElement | null;
     const grid = middle?.parentElement as HTMLElement | null;
     const left = grid?.children.item(0) as HTMLElement | null;
     const right = grid?.children.item(2) as HTMLElement | null;
-    if (!middle || !left || !right) return;
+    if (!section || !middle || !grid || !left || !right) return;
 
     const desktop = window.matchMedia('(min-width: 1024px)');
     let frame = 0;
 
+    const resetSide = (element: HTMLElement) => {
+      element.style.height = '';
+      element.style.maxHeight = '';
+      element.style.overflowY = '';
+      element.style.overscrollBehavior = '';
+      element.style.scrollbarGutter = '';
+    };
+
     const reset = () => {
+      grid.style.alignItems = '';
       middle.style.height = '';
-      right.style.height = '';
-      right.style.overflowY = '';
-      right.style.overscrollBehavior = '';
-      right.style.scrollbarGutter = '';
+      resetSide(left);
+      resetSide(right);
     };
 
     const sync = () => {
@@ -75,18 +81,32 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
           reset();
           return;
         }
-        const height = Math.ceil(left.getBoundingClientRect().height);
-        if (height <= 0) return;
-        middle.style.height = `${height}px`;
-        right.style.height = `${height}px`;
-        right.style.overflowY = 'auto';
-        right.style.overscrollBehavior = 'contain';
-        right.style.scrollbarGutter = 'stable';
+
+        // Prevent the grid row's tallest side column from stretching the carousel.
+        grid.style.alignItems = 'start';
+        middle.style.height = '';
+        resetSide(left);
+        resetSide(right);
+
+        // Measure after the carousel has returned to its natural content height.
+        window.cancelAnimationFrame(frame);
+        frame = window.requestAnimationFrame(() => {
+          const height = Math.ceil(section.getBoundingClientRect().height);
+          if (height <= 0) return;
+
+          [left, right].forEach((element) => {
+            element.style.height = `${height}px`;
+            element.style.maxHeight = `${height}px`;
+            element.style.overflowY = 'auto';
+            element.style.overscrollBehavior = 'contain';
+            element.style.scrollbarGutter = 'stable';
+          });
+        });
       });
     };
 
     const observer = new ResizeObserver(sync);
-    observer.observe(left);
+    observer.observe(section);
     desktop.addEventListener('change', sync);
     window.addEventListener('resize', sync);
     sync();
@@ -118,7 +138,7 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
       role="region"
       aria-roledescription="carousel"
       aria-label={isEvents ? t('Sự kiện – Hội thảo', 'Events & Conferences') : t('Tin nổi bật', 'Top stories')}
-      className="flex h-full min-w-0 flex-col overflow-hidden"
+      className="min-w-0"
       data-testid="event-carousel"
       onPointerEnter={(event) => {
         if (event.pointerType === 'mouse') setHovered(true);
@@ -137,15 +157,15 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
         }
       }}
     >
-      <div className="mb-3 flex shrink-0 items-center justify-between gap-3 border-b-2 border-ink pb-2">
+      <div className="mb-3 flex items-center justify-between gap-3 border-b-2 border-ink pb-2">
         <h2 className="text-[0.8rem] font-bold uppercase tracking-[0.06em] text-seal">
           {isEvents ? t('Sự kiện – Hội thảo', 'Events & Conferences') : t('Tin nổi bật', 'Top stories')}
         </h2>
         <span className="num shrink-0 text-xs text-muted-foreground" data-testid="event-slide-count">{String(selected + 1).padStart(2, '0')} / {String(articles.length).padStart(2, '0')}</span>
       </div>
 
-      <div ref={viewport} className="min-h-0 flex-1 overflow-hidden" aria-live={rotating ? 'off' : 'polite'}>
-        <div className="flex h-full touch-pan-y">
+      <div ref={viewport} className="overflow-hidden" aria-live={rotating ? 'off' : 'polite'}>
+        <div className="flex touch-pan-y">
           {articles.map((article, index) => (
             <article
               key={article.id}
@@ -154,24 +174,24 @@ export function EventCarousel({ articles, isEvents }: { articles: ArticleSummary
               aria-label={`${index + 1} / ${articles.length}`}
               aria-hidden={index !== selected}
               inert={index !== selected}
-              className="flex h-full min-w-0 shrink-0 grow-0 basis-full flex-col overflow-hidden"
+              className="flex min-w-0 shrink-0 grow-0 basis-full flex-col"
               data-testid={`event-slide-${index + 1}`}
             >
-              <Link href={`/tin-tuc/${article.slug}`} tabIndex={-1} aria-hidden className="shrink-0">
+              <Link href={`/tin-tuc/${article.slug}`} tabIndex={-1} aria-hidden>
                 <Img src={article.coverImage} alt={article.title} ratio="aspect-[16/9.5]" />
               </Link>
-              <h3 className="mt-4 shrink-0 font-display text-[1.4rem] font-bold leading-[1.25] text-ink sm:text-[1.65rem]">
+              <h3 className="mt-4 font-display text-[1.4rem] font-bold leading-[1.25] text-ink sm:text-[1.65rem]">
                 <Link href={`/tin-tuc/${article.slug}`} className="headline-link" data-testid={`event-slide-link-${index + 1}`}>{article.title}</Link>
               </h3>
-              <p className="mb-3 mt-2.5 line-clamp-3 shrink-0 text-[0.94rem] leading-relaxed text-foreground/80">{article.summary}</p>
-              <ArticleMeta a={article} className="mt-auto shrink-0 pt-1" />
+              <p className="mb-3 mt-2.5 line-clamp-3 text-[0.94rem] leading-relaxed text-foreground/80">{article.summary}</p>
+              <ArticleMeta a={article} className="mt-auto pt-1" />
             </article>
           ))}
         </div>
       </div>
 
       {articles.length > 1 && (
-        <div className="mt-4 flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-rule pt-3">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-rule pt-3">
           <div className="flex" role="group" aria-label={t('Chọn bài viết', 'Choose a story')}>
             {articles.map((article, index) => (
               <button key={article.id} onClick={() => changeSlide(index)} className="grid h-11 w-8 place-items-center" aria-label={`${t('Bài', 'Story')} ${index + 1}: ${article.title}`} aria-current={selected === index ? 'true' : undefined} data-testid={`button-slide-${index + 1}`}>
