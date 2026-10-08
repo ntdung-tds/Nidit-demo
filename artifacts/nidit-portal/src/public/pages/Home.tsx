@@ -74,9 +74,10 @@ export default function HomePage() {
   const events = f.sections.find((section) => section.categorySlug === 'su-kien-hoi-thao')?.articles ?? [];
   const slides = (events.length ? events : f.featured.length ? f.featured : f.latest).slice(0, 4);
   const lead = slides[0];
+  const focusPool = [...f.featured, ...f.latest, ...f.sections.flatMap((section) => section.articles)];
   const sideFeatured = Array.from(
     new Map(
-      [...f.featured, ...f.latest]
+      focusPool
         .filter((a) => a.id !== lead?.id)
         .map((a) => [a.id, a]),
     ).values(),
