@@ -53,8 +53,8 @@ jobs:
           VITE_GITHUB_PAGES: "true"
           VITE_API_BASE_URL: ${{ vars.NIDIT_API_BASE_URL || 'https://66t9uc18mn3.sisko.replit.dev' }}
 
-      - name: Add IAICT static demo
-        run: node scripts/build-iaict-pages-demo.mjs
+      - name: Build premium IAICT demo
+        run: node scripts/build-iaict-premium.mjs
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
