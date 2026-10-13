@@ -100,6 +100,9 @@ jobs:
       - name: Densify knowledge cards V7.4
         run: node scripts/enhance-iaict-home-v74.mjs
 
+      - name: Enhance Academy knowledge card V7.5
+        run: node scripts/enhance-iaict-home-v75.mjs
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
