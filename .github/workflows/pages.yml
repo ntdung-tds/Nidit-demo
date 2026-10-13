@@ -108,6 +108,9 @@ jobs:
           node scripts/patch-iaict-institutional-v81.mjs
           node scripts/enhance-iaict-institutional-v8.mjs
 
+      - name: Apply sitewide WOW+++ V9
+        run: node scripts/enhance-iaict-wow-v9.mjs
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
