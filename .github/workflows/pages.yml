@@ -65,6 +65,9 @@ jobs:
       - name: Apply Vietnamese typography system
         run: node scripts/enhance-iaict-typography.mjs
 
+      - name: Apply IAICT homepage WOW v2 refinement
+        run: node scripts/enhance-iaict-wow-v2.mjs
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
