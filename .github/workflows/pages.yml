@@ -85,6 +85,9 @@ jobs:
       - name: Enrich category cards V6.1
         run: node scripts/enhance-iaict-category-v61.mjs
 
+      - name: Expand category content V6.2
+        run: node scripts/enhance-iaict-category-v62.mjs
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
