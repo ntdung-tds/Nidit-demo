@@ -76,6 +76,9 @@ jobs:
           sed -i 's/PROJECT SPOTLIGHT/IAICT Project Lab · Trâm Rừng/' scripts/enhance-iaict-project-v4.mjs
           node scripts/enhance-iaict-project-v4.mjs
 
+      - name: Build Trâm Rừng case study V5
+        run: node scripts/enhance-iaict-tram-rung-v5.mjs
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
