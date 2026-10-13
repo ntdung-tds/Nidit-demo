@@ -82,6 +82,9 @@ jobs:
       - name: Apply category landing V6
         run: node scripts/enhance-iaict-category-v6.mjs
 
+      - name: Enrich category cards V6.1
+        run: node scripts/enhance-iaict-category-v61.mjs
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
