@@ -97,6 +97,9 @@ jobs:
       - name: Tighten homepage empty blocks V7.3
         run: node scripts/enhance-iaict-home-v73.mjs
 
+      - name: Densify knowledge cards V7.4
+        run: node scripts/enhance-iaict-home-v74.mjs
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
