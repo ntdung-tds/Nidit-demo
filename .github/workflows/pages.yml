@@ -114,6 +114,9 @@ jobs:
       - name: Apply blue-white WOW+++ V10
         run: node scripts/enhance-iaict-wow-v10.mjs
 
+      - name: Apply blue-white editorial V11
+        run: node scripts/enhance-iaict-wow-v11.mjs
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
