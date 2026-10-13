@@ -103,8 +103,10 @@ jobs:
       - name: Enhance Academy knowledge card V7.5
         run: node scripts/enhance-iaict-home-v75.mjs
 
-      - name: Apply institutional pages V8
-        run: node scripts/enhance-iaict-institutional-v8.mjs
+      - name: Apply institutional pages V8.1
+        run: |
+          node scripts/patch-iaict-institutional-v81.mjs
+          node scripts/enhance-iaict-institutional-v8.mjs
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
