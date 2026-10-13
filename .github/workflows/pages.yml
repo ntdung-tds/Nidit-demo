@@ -117,6 +117,9 @@ jobs:
       - name: Apply blue-white editorial V11
         run: node scripts/enhance-iaict-wow-v11.mjs
 
+      - name: Apply IAICT editorial V12
+        run: node scripts/enhance-iaict-wow-v12.mjs
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -132,3 +135,4 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
