@@ -59,6 +59,9 @@ jobs:
       - name: Enhance IAICT WOW+ depth
         run: node scripts/enhance-iaict-wowplus.mjs
 
+      - name: Apply IAICT production WOW UI
+        run: node scripts/enhance-iaict-production-ui.mjs
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
