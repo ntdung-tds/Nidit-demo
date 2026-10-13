@@ -120,6 +120,9 @@ jobs:
       - name: Apply IAICT editorial V12
         run: node scripts/enhance-iaict-wow-v12.mjs
 
+      - name: Enable IAICT public content search
+        run: node scripts/enable-iaict-public-search.mjs
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
