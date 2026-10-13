@@ -72,7 +72,9 @@ jobs:
         run: node scripts/enhance-iaict-hero-v3.mjs
 
       - name: Apply IAICT Project V4 refinement
-        run: node scripts/enhance-iaict-project-v4.mjs
+        run: |
+          sed -i 's/PROJECT SPOTLIGHT/IAICT Project Lab · Trâm Rừng/' scripts/enhance-iaict-project-v4.mjs
+          node scripts/enhance-iaict-project-v4.mjs
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
