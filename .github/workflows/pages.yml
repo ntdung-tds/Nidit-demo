@@ -94,6 +94,9 @@ jobs:
       - name: Balance homepage visual density V7.2
         run: node scripts/enhance-iaict-home-v72.mjs
 
+      - name: Tighten homepage empty blocks V7.3
+        run: node scripts/enhance-iaict-home-v73.mjs
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
