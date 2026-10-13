@@ -68,6 +68,9 @@ jobs:
       - name: Apply IAICT homepage WOW v2 refinement
         run: node scripts/enhance-iaict-wow-v2.mjs
 
+      - name: Apply IAICT Hero WOW v3
+        run: node scripts/enhance-iaict-hero-v3.mjs
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
